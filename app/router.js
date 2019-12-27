@@ -7,6 +7,8 @@ module.exports = app => {
   const { router, controller } = app;
   router.get('/', controller.home.index);
 
-  router.resources('topics', '/api/v2/topics', 'topics');
+  router.resources('topics', '/api/v2/topics', controller.v2.topics);
+
+  router.resources('graphs', '/api/v1/graphs', controller.v1.graphs);
 
 };
