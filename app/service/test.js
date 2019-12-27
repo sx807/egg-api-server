@@ -10,8 +10,8 @@ class HomeService extends Service {
     this.show();
   }
 
-  async show(cmd) {
-    const { stdout, stderr } = await exec(cmd);
+  async show() {
+    const { stdout, stderr } = await exec('pwd');
     // console.log('stdout:', stdout);
     console.log('stderr:', stderr);
     const result = stdout;

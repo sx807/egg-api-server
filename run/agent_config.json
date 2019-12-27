@@ -75,7 +75,7 @@
     "onerror": {
       "errorPageUrl": "",
       "appErrorFilter": null,
-      "templatePath": "/opt/dev/egg-example/node_modules/egg-onerror/lib/onerror_page.mustache"
+      "templatePath": "/opt/dev/egg-api-server/node_modules/egg-onerror/lib/onerror_page.mustache"
     },
     "i18n": {
       "defaultLocale": "en_US",
@@ -88,8 +88,8 @@
     "watcher": {
       "type": "development",
       "eventSources": {
-        "default": "/opt/dev/egg-example/node_modules/egg-watcher/lib/event-sources/default",
-        "development": "/opt/dev/egg-example/node_modules/egg-watcher/lib/event-sources/development"
+        "default": "/opt/dev/egg-api-server/node_modules/egg-watcher/lib/event-sources/default",
+        "development": "/opt/dev/egg-api-server/node_modules/egg-watcher/lib/event-sources/development"
       }
     },
     "customLogger": {
@@ -117,6 +117,13 @@
         "cron": "0 30 4 * * *"
       }
     },
+    "development": {
+      "watchDirs": [],
+      "ignoreDirs": [],
+      "fastReady": false,
+      "reloadOnDebug": true,
+      "overrideDefault": false
+    },
     "logrotator": {
       "filesRotateByHour": null,
       "hourDelimiter": "-",
@@ -128,21 +135,21 @@
     },
     "static": {
       "prefix": "/public/",
-      "dir": "/opt/dev/egg-example/app/public",
+      "dir": "/opt/dev/egg-api-server/app/public",
       "dynamic": true,
       "preload": false,
       "buffer": false,
       "maxFiles": 1000
     },
     "view": {
-      "root": "/opt/dev/egg-example/app/view",
-      "cache": true,
+      "root": "/opt/dev/egg-api-server/app/view",
+      "cache": false,
       "defaultExtension": ".html",
       "defaultViewEngine": "",
       "mapping": {}
     },
     "validate": {},
-    "env": "unittest",
+    "env": "local",
     "name": "egg",
     "keys": "<String len: 22>",
     "cookies": {},
@@ -200,9 +207,9 @@
       "author": "sxing",
       "license": "MIT"
     },
-    "baseDir": "/opt/dev/egg-example",
+    "baseDir": "/opt/dev/egg-api-server",
     "HOME": "/home/sxing",
-    "rundir": "/opt/dev/egg-example/run",
+    "rundir": "/opt/dev/egg-api-server/run",
     "dump": {
       "ignore": "<Set>"
     },
@@ -234,19 +241,21 @@
       "onerror": "<Function onerror>"
     },
     "logger": {
-      "dir": "/opt/dev/egg-example/logs/egg",
+      "dir": "/opt/dev/egg-api-server/logs/egg",
       "encoding": "utf8",
-      "env": "unittest",
+      "env": "local",
       "level": "INFO",
-      "consoleLevel": "WARN",
+      "consoleLevel": "INFO",
       "disableConsoleAfterReady": false,
       "outputJSON": false,
-      "buffer": false,
+      "buffer": true,
       "appLogName": "egg-web.log",
       "coreLogName": "egg-web.log",
       "agentLogName": "egg-agent.log",
       "errorLogName": "common-error.log",
-      "coreLogger": {},
+      "coreLogger": {
+        "consoleLevel": "WARN"
+      },
       "allowDebugAtProd": false,
       "type": "agent"
     },
@@ -310,8 +319,8 @@
       "dependencies": [],
       "optionalDependencies": [],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-session",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-session",
       "version": "3.1.0"
     },
     "security": {
@@ -323,8 +332,8 @@
         "session"
       ],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-security",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-security",
       "version": "2.7.1"
     },
     "jsonp": {
@@ -336,8 +345,8 @@
         "security"
       ],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-jsonp",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-jsonp",
       "version": "2.0.0"
     },
     "onerror": {
@@ -349,8 +358,8 @@
         "jsonp"
       ],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-onerror",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-onerror",
       "version": "2.1.0"
     },
     "i18n": {
@@ -360,8 +369,8 @@
       "dependencies": [],
       "optionalDependencies": [],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-i18n",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-i18n",
       "version": "2.1.1"
     },
     "watcher": {
@@ -371,8 +380,8 @@
       "dependencies": [],
       "optionalDependencies": [],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-watcher",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-watcher",
       "version": "3.1.0"
     },
     "schedule": {
@@ -382,8 +391,8 @@
       "dependencies": [],
       "optionalDependencies": [],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-schedule",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-schedule",
       "version": "3.6.4"
     },
     "multipart": {
@@ -395,9 +404,24 @@
         "schedule"
       ],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-multipart",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-multipart",
       "version": "2.10.0"
+    },
+    "development": {
+      "enable": true,
+      "package": "egg-development",
+      "name": "development",
+      "dependencies": [
+        "watcher"
+      ],
+      "optionalDependencies": [],
+      "env": [
+        "local"
+      ],
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-development",
+      "version": "2.4.3"
     },
     "logrotator": {
       "enable": true,
@@ -408,8 +432,8 @@
       ],
       "optionalDependencies": [],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-logrotator",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-logrotator",
       "version": "3.1.0"
     },
     "static": {
@@ -419,8 +443,8 @@
       "dependencies": [],
       "optionalDependencies": [],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-static",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-static",
       "version": "2.2.0"
     },
     "view": {
@@ -430,8 +454,8 @@
       "dependencies": [],
       "optionalDependencies": [],
       "env": [],
-      "from": "/opt/dev/egg-example/node_modules/egg/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-view",
+      "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-view",
       "version": "2.1.2"
     },
     "validate": {
@@ -441,18 +465,9 @@
       "dependencies": [],
       "optionalDependencies": [],
       "env": [],
-      "from": "/opt/dev/egg-example/config/plugin.js",
-      "path": "/opt/dev/egg-example/node_modules/egg-validate",
+      "from": "/opt/dev/egg-api-server/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-validate",
       "version": "2.0.2"
-    },
-    "egg-mock": {
-      "enable": true,
-      "path": "/opt/dev/egg-example/node_modules/egg-mock",
-      "name": "egg-mock",
-      "dependencies": [],
-      "optionalDependencies": [],
-      "env": [],
-      "version": "3.25.0"
     }
   }
 }
