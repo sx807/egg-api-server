@@ -148,6 +148,21 @@
       "defaultViewEngine": "",
       "mapping": {}
     },
+    "mysql": {
+      "default": {
+        "database": null,
+        "connectionLimit": 5
+      },
+      "app": true,
+      "agent": false,
+      "client": {
+        "host": "localhost",
+        "port": "3306",
+        "user": "node",
+        "password": "<String len: 4>",
+        "database": "callgraph"
+      }
+    },
     "validate": {},
     "env": "local",
     "name": "egg",
@@ -170,6 +185,7 @@
       "dependencies": {
         "child_process": "^1.0.2",
         "egg": "^2.15.1",
+        "egg-mysql": "^3.0.0",
         "egg-scripts": "^2.11.0",
         "egg-validate": "^2.0.2"
       },
@@ -457,6 +473,17 @@
       "from": "/opt/dev/egg-api-server/node_modules/egg/config/plugin.js",
       "path": "/opt/dev/egg-api-server/node_modules/egg-view",
       "version": "2.1.2"
+    },
+    "mysql": {
+      "enable": true,
+      "package": "egg-mysql",
+      "name": "mysql",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/dev/egg-api-server/config/plugin.js",
+      "path": "/opt/dev/egg-api-server/node_modules/egg-mysql",
+      "version": "3.0.0"
     },
     "validate": {
       "enable": true,

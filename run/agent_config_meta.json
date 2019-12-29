@@ -1,6 +1,21 @@
 {
   "keys": "/opt/dev/egg-api-server/config/config.default.js",
   "middleware": "/opt/dev/egg-api-server/config/config.default.js",
+  "mysql": {
+    "client": {
+      "host": "/opt/dev/egg-api-server/config/config.default.js",
+      "port": "/opt/dev/egg-api-server/config/config.default.js",
+      "user": "/opt/dev/egg-api-server/config/config.default.js",
+      "password": "/opt/dev/egg-api-server/config/config.default.js",
+      "database": "/opt/dev/egg-api-server/config/config.default.js"
+    },
+    "app": "/opt/dev/egg-api-server/config/config.default.js",
+    "agent": "/opt/dev/egg-api-server/config/config.default.js",
+    "default": {
+      "database": "/opt/dev/egg-api-server/node_modules/egg-mysql/config/config.default.js",
+      "connectionLimit": "/opt/dev/egg-api-server/node_modules/egg-mysql/config/config.default.js"
+    }
+  },
   "session": {
     "maxAge": "/opt/dev/egg-api-server/node_modules/egg-session/config/config.default.js",
     "key": "/opt/dev/egg-api-server/node_modules/egg-session/config/config.default.js",
@@ -166,6 +181,7 @@
     "dependencies": {
       "child_process": "/opt/dev/egg-api-server/node_modules/egg/config/config.default.js",
       "egg": "/opt/dev/egg-api-server/node_modules/egg/config/config.default.js",
+      "egg-mysql": "/opt/dev/egg-api-server/node_modules/egg/config/config.default.js",
       "egg-scripts": "/opt/dev/egg-api-server/node_modules/egg/config/config.default.js",
       "egg-validate": "/opt/dev/egg-api-server/node_modules/egg/config/config.default.js"
     },

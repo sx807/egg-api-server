@@ -15,6 +15,7 @@ class HomeService extends Service {
     // console.log('stdout:', stdout);
     console.log('stderr:', stderr);
     const result = stdout;
+    await app.mysql.query(sql, values);
     return result.replace('\n', '');
   }
 }

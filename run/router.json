@@ -19,8 +19,8 @@
       "GET"
     ],
     "paramNames": [],
-    "path": "/api/v2/topics",
-    "regexp": "/^\\/api\\/v2\\/topics(?:\\/(?=$))?$/",
+    "path": "/api/v1/topics",
+    "regexp": "/^\\/api\\/v1\\/topics(?:\\/(?=$))?$/",
     "stack": [
       "wrappedController"
     ]
@@ -31,8 +31,8 @@
       "POST"
     ],
     "paramNames": [],
-    "path": "/api/v2/topics",
-    "regexp": "/^\\/api\\/v2\\/topics(?:\\/(?=$))?$/",
+    "path": "/api/v1/topics",
+    "regexp": "/^\\/api\\/v1\\/topics(?:\\/(?=$))?$/",
     "stack": [
       "wrappedController"
     ]
@@ -55,8 +55,8 @@
         "pattern": "[^\\/]+?"
       }
     ],
-    "path": "/api/v2/topics/:id",
-    "regexp": "/^\\/api\\/v2\\/topics\\/((?:[^\\/]+?))(?:\\/(?=$))?$/",
+    "path": "/api/v1/topics/:id",
+    "regexp": "/^\\/api\\/v1\\/topics\\/((?:[^\\/]+?))(?:\\/(?=$))?$/",
     "stack": [
       "wrappedController"
     ]
@@ -79,8 +79,81 @@
         "pattern": "[^\\/]+?"
       }
     ],
-    "path": "/api/v2/topics/:id",
-    "regexp": "/^\\/api\\/v2\\/topics\\/((?:[^\\/]+?))(?:\\/(?=$))?$/",
+    "path": "/api/v1/topics/:id",
+    "regexp": "/^\\/api\\/v1\\/topics\\/((?:[^\\/]+?))(?:\\/(?=$))?$/",
+    "stack": [
+      "wrappedController"
+    ]
+  },
+  {
+    "name": "graphs",
+    "methods": [
+      "HEAD",
+      "GET"
+    ],
+    "paramNames": [],
+    "path": "/api/v1/graphs",
+    "regexp": "/^\\/api\\/v1\\/graphs(?:\\/(?=$))?$/",
+    "stack": [
+      "wrappedController"
+    ]
+  },
+  {
+    "name": "graphs",
+    "methods": [
+      "POST"
+    ],
+    "paramNames": [],
+    "path": "/api/v1/graphs",
+    "regexp": "/^\\/api\\/v1\\/graphs(?:\\/(?=$))?$/",
+    "stack": [
+      "wrappedController"
+    ]
+  },
+  {
+    "name": "graph",
+    "methods": [
+      "HEAD",
+      "GET"
+    ],
+    "paramNames": [
+      {
+        "name": "id",
+        "prefix": "/",
+        "delimiter": "/",
+        "optional": false,
+        "repeat": false,
+        "partial": false,
+        "asterisk": false,
+        "pattern": "[^\\/]+?"
+      }
+    ],
+    "path": "/api/v1/graphs/:id",
+    "regexp": "/^\\/api\\/v1\\/graphs\\/((?:[^\\/]+?))(?:\\/(?=$))?$/",
+    "stack": [
+      "wrappedController"
+    ]
+  },
+  {
+    "name": "graph",
+    "methods": [
+      "PATCH",
+      "PUT"
+    ],
+    "paramNames": [
+      {
+        "name": "id",
+        "prefix": "/",
+        "delimiter": "/",
+        "optional": false,
+        "repeat": false,
+        "partial": false,
+        "asterisk": false,
+        "pattern": "[^\\/]+?"
+      }
+    ],
+    "path": "/api/v1/graphs/:id",
+    "regexp": "/^\\/api\\/v1\\/graphs\\/((?:[^\\/]+?))(?:\\/(?=$))?$/",
     "stack": [
       "wrappedController"
     ]
