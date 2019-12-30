@@ -15,7 +15,7 @@ class HomeService extends Service {
     // console.log('stdout:', stdout);
     console.log('stderr:', stderr);
     // const result = stdout.replace('\n', '');
-    const result = await this.app.mysql.select('linux_4-15-18_R_x86_64_FDLIST');
+    const result = await this.app.mysqlshow.select('linux_4-15-18_R_x86_64_FDLIST');
     return result;
   }
 }
