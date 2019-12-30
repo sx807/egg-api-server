@@ -28,9 +28,9 @@ class GraphController extends Controller {
     const { ctx } = this;
 
     ctx.validate({
-      page: { type: 'string', format: /\d+/, required: false },
-      tab: { type: 'enum', values: [ 'ask', 'share', 'job', 'good' ], required: false },
-      limit: { type: 'string', format: /\d+/, required: false },
+      version: 'string',
+      source: 'string',
+      target: 'string',
     }, ctx.query);
 
     ctx.body = await ctx.service.graphs.list(ctx.query);
