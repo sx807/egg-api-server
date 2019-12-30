@@ -30,10 +30,22 @@ class GraphService extends Service {
     // linux_4-15-18_R_x86_64_SLIST
     const { ctx } = this;
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
-    const result = this.pathtojson(params.source)
+    this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
+    // const result = path.parse(params.source)
 
-    // const result = await this.app.mysql.select(ctx.table.fd);
-    return { result };
+    // const result = await this.app.mysql.select(this.table.fd);
+    // return { result };
+    const test = this.node(params.source)
+    return test
+  }
+
+  node(path){
+    const results = await this.app.mysql.select(this.table.fd, { // 搜索表
+      where: { f_dfile: path+'%' }, // WHERE 条件
+      columns: ['f_dfile'], // 要查询的表字段
+      orders: [['created_at','desc'], ['id','desc']], // 排序方式
+    });
+    return results
   }
 
   pathtojson(str) {
@@ -47,16 +59,19 @@ class GraphService extends Service {
         t = tmp[i]
         tree[t]={}
       }
-      else {
-        tree[tmp[i]]={}
-        tree[t] = {tree}
-        t = tmp[i]
+      else if (i%2){
+        // root[tmp[i]] = tree
+        tree[tmp[i]] = root
+      }
+      else{
+        // tree[tmp[i]] = root
+        root[tmp[i]] = tree
       }
       
     }
-
-    return tree
+    return root
   }
+
 }
 
 module.exports = GraphService;
