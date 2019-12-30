@@ -9,7 +9,7 @@ class GraphService extends Service {
   }
 
   async show(params) {
-    const result = await this.request(`/topic/${params.id}`, {
+    const result = await this.request(`/graph/${params.id}`, {
       data: {
         mdrender: params.mdrender,
         accesstoken: params.accesstoken,
@@ -21,12 +21,10 @@ class GraphService extends Service {
   }
 
   async list(params) {
-    const result = await this.request('/topics', {
-      data: params,
-    });
+    const result = params
 
-    this.checkSuccess(result);
-    return result.data.data;
+    // this.checkSuccess(result);
+    return result;
   }
 
   checkSuccess(result) {

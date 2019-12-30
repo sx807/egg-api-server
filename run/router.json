@@ -99,46 +99,10 @@
     ]
   },
   {
-    "name": "graphs",
-    "methods": [
-      "POST"
-    ],
-    "paramNames": [],
-    "path": "/api/v1/graphs",
-    "regexp": "/^\\/api\\/v1\\/graphs(?:\\/(?=$))?$/",
-    "stack": [
-      "wrappedController"
-    ]
-  },
-  {
     "name": "graph",
     "methods": [
       "HEAD",
       "GET"
-    ],
-    "paramNames": [
-      {
-        "name": "id",
-        "prefix": "/",
-        "delimiter": "/",
-        "optional": false,
-        "repeat": false,
-        "partial": false,
-        "asterisk": false,
-        "pattern": "[^\\/]+?"
-      }
-    ],
-    "path": "/api/v1/graphs/:id",
-    "regexp": "/^\\/api\\/v1\\/graphs\\/((?:[^\\/]+?))(?:\\/(?=$))?$/",
-    "stack": [
-      "wrappedController"
-    ]
-  },
-  {
-    "name": "graph",
-    "methods": [
-      "PATCH",
-      "PUT"
     ],
     "paramNames": [
       {

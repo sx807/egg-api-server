@@ -7,10 +7,10 @@ class GraphController extends Controller {
     super(ctx);
 
     this.createRule = {
-      accesstoken: 'string',
-      title: 'string',
-      tab: { type: 'enum', values: [ 'ask', 'share', 'job' ], required: false },
-      content: 'string',
+      version: 'string',
+      source: 'string',
+      target: 'string',
+      tab: { type: 'enum', values: [ 'ask', 'share', 'job' ], required: false }
     };
   }
 
@@ -33,12 +33,7 @@ class GraphController extends Controller {
       limit: { type: 'string', format: /\d+/, required: false },
     }, ctx.query);
 
-    ctx.body = await ctx.service.graphs.list({
-      page: ctx.query.page,
-      tab: ctx.query.tab,
-      limit: ctx.query.limit,
-      mdrender: ctx.query.mdrender !== 'false',
-    });
+    ctx.body = await ctx.service.graphs.list(ctx.query);
   }
 
 }
