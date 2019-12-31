@@ -11,6 +11,20 @@ class GraphService extends Service {
       so : 'test'
       // s : 'linux_' + String(params.version) + '_R_x86_64_SLIST'
     }
+    this.node = {
+      id: '',
+      path: '',
+      group: '',
+      value: 1
+    }
+    this.edge = {
+      source: '',
+      target: '',
+      sourceWeight: 1,
+      targetWeight: 1,
+      group: ''
+    }
+    this.nodes = {}
   }
 
   async show(params) {
@@ -35,17 +49,62 @@ class GraphService extends Service {
 
     // const result = await this.app.mysql.select(this.table.fd);
     // return { result };
-    const test = this.node(params.source)
+    // const test = this.get_list(this.table.fd,'f_dfile')
+    let test = this.paths(params)
     return test
   }
 
-  node(path){
-    const results = await this.app.mysql.select(this.table.fd, { // 搜索表
-      where: { f_dfile: path+'%' }, // WHERE 条件
-      columns: ['f_dfile'], // 要查询的表字段
-      orders: [['created_at','desc'], ['id','desc']], // 排序方式
-    });
-    return results
+  paths(p){
+    let t = []
+    t.push(this.path(p.source))
+    t.push(this.path(p.target))
+
+    // let sou = {}
+    // sou[path.normalize(p.source)] = {}
+    // sou[path.normalize(p.target)] = {}
+    
+    // sou[path.parse(p.source).dir + '/'] = {}
+    // sou[path.parse(p.target).dir + '/'] = {}
+    return t
+  }
+  async path(str){
+    let t = []
+    let res = []
+    
+    // add per path - fix-001
+    if (str.indexOf(".") > 0) {
+      // .x file
+      console.log('1 ' + str)
+    }
+    else {
+      // /x/ dir
+      console.log('2 ' + str)
+      t.push(path.normalize(str))
+      t.push(path.parse(str).dir + '/')
+      let list = await this.get_list(this.table.fd,'f_dfile')
+      for (let item of list){
+        let p = item.f_dfile
+        if (p.indexOf(path.parse(str).dir) == 0){
+          res.push(item.f_dfile)
+        }
+      }
+    }
+    // else {
+    //   // / root
+    //   console.log('3 ' + str)
+
+    // }
+    console.log(res)
+    return res
+  }
+  async per_path(p){
+    return path.parse(p).dir + '/'
+  }
+
+  async get_list(table,list){
+    const sql = `select ${list} from \`${table}\` group by ${list} order by ${list} desc;`
+    const flist = await this.app.mysql.query(sql);
+    return flist
   }
 
   pathtojson(str) {
