@@ -54,11 +54,10 @@ class GraphService extends Service {
     return test
   }
 
-  paths(p){
+  async paths(p){
     let t = []
-    t.push(this.path(p.source))
-    t.push(this.path(p.target))
-
+    t.push(await this.path(p.source))
+    t.push(await this.path(p.target))
     // let sou = {}
     // sou[path.normalize(p.source)] = {}
     // sou[path.normalize(p.target)] = {}
@@ -68,24 +67,35 @@ class GraphService extends Service {
     return t
   }
   async path(str){
-    let t = []
+    const path_in = path.normalize(str)
+    let t = new Array(path_in)
     let res = []
     
     // add per path - fix-001
-    if (str.indexOf(".") > 0) {
+    if (path_in.indexOf(".") > 0) {
       // .x file
-      console.log('1 ' + str)
+      console.log('1 ' + path_in)
     }
     else {
-      // /x/ dir
-      console.log('2 ' + str)
-      t.push(path.normalize(str))
-      t.push(path.parse(str).dir + '/')
+      // /x dir
+      console.log('2 ' + path_in)
+      t.push(path.parse(path_in).dir)
       let list = await this.get_list(this.table.fd,'f_dfile')
       for (let item of list){
         let p = item.f_dfile
-        if (p.indexOf(path.parse(str).dir) == 0){
-          res.push(item.f_dfile)
+        if (p.indexOf(path_in) == 0){
+          // x/...
+          if(p.slice(path_in.length).indexOf('/') > 1){
+            // console.log(p.slice(str.length))
+            p = p.slice(0,p.indexOf('/',path_in.length))
+            // console.log(p)
+          }
+          res.push(p)
+        }
+        else if (p.indexOf(path.parse(path_in).dir) == 0){
+          p = p.slice(0,p.indexOf('/'))
+          //fix
+          res.push(p)
         }
       }
     }
@@ -94,9 +104,16 @@ class GraphService extends Service {
     //   console.log('3 ' + str)
 
     // }
-    console.log(res)
-    return res
+    const result = await this.unique(res)
+    console.log(t)
+    // console.log(result)
+    return result
   }
+
+  async unique (arr) {
+    return Array.from(new Set(arr))
+  }
+
   async per_path(p){
     return path.parse(p).dir + '/'
   }
