@@ -1,11 +1,11 @@
 'use strict';
 
-const Service = require('egg').Service;
+const Service = require('egg').Service
 const path = require("path")
 
 class GraphService extends Service {
   constructor(ctx) {
-    super(ctx);
+    super(ctx)
     this.table = {
       fd : 'test',
       so : 'test'
@@ -24,7 +24,7 @@ class GraphService extends Service {
       targetWeight: 1,
       group: ''
     }
-    this.nodes = {}
+    // this.nodes = {}
   }
 
   async show(params) {
@@ -51,62 +51,92 @@ class GraphService extends Service {
     // return { result };
     // const test = this.get_list(this.table.fd,'f_dfile')
     let test = this.paths(params)
+    this.nodes(test)
+    this.edges(test)
+    this.tojson()
+
     return test
   }
 
+  async nodes(list){
+    
+  }
+
+  async edges(list){
+
+  }
+
+  async tojson(){
+
+  }
+
   async paths(p){
-    let t = []
-    t.push(await this.path(p.source))
-    t.push(await this.path(p.target))
+    let res = []
+    if (p.source == '/' && p.target == '/'){
+      res = await this.path(p.source)
+    }
+    else {
+      res = res.concat(await this.path(p.source),await this.path(p.target))
+    }
+    res = await this.unique(res)
+    res = res.filter(item => !(this.isrootpath(p.source,item) || this.isrootpath(p.target,item)))
+
     // let sou = {}
     // sou[path.normalize(p.source)] = {}
     // sou[path.normalize(p.target)] = {}
     
     // sou[path.parse(p.source).dir + '/'] = {}
     // sou[path.parse(p.target).dir + '/'] = {}
-    return t
+
+    return res
   }
+
+  isrootpath(path,root){
+    let res = false
+    if(path != '/'  && path.indexOf(root) == 0){
+      res = true
+    }
+    return res
+  }
+
   async path(str){
-    const path_in = path.normalize(str)
-    let t = new Array(path_in)
+    const path_input = path.normalize(str)
+    let path_per = path.parse(path_input).dir
     let res = []
     
     // add per path - fix-001
-    if (path_in.indexOf(".") > 0) {
+    if (path_input.indexOf(".") > 0) {
       // .x file
-      console.log('1 ' + path_in)
+      console.log('1 ' + path_input)
     }
     else {
       // /x dir
-      console.log('2 ' + path_in)
-      t.push(path.parse(path_in).dir)
+      console.log('2 ' + path_input)
+      // t.push(path.parse(path_in).dir)
       let list = await this.get_list(this.table.fd,'f_dfile')
       for (let item of list){
-        let p = item.f_dfile
-        if (p.indexOf(path_in) == 0){
+        let p = '/' + item.f_dfile
+        if (path_input != '/' && p.indexOf(path_input) == 0){
           // x/...
-          if(p.slice(path_in.length).indexOf('/') > 1){
-            // console.log(p.slice(str.length))
-            p = p.slice(0,p.indexOf('/',path_in.length))
+          if(p.slice(path_input.length + 1).indexOf('/') > 1){
+            p = p.slice(0,p.indexOf('/',path_input.length + 1))
             // console.log(p)
           }
+          // console.log('2.1 ' + p)
           res.push(p)
         }
-        else if (p.indexOf(path.parse(path_in).dir) == 0){
-          p = p.slice(0,p.indexOf('/'))
+        else if (p.indexOf(path_per) == 0){
+          p = p.slice(0,p.indexOf('/',path_per.length + 1))
+          // console.log('2.2 ' + p)
           //fix
           res.push(p)
         }
       }
     }
-    // else {
-    //   // / root
-    //   console.log('3 ' + str)
 
-    // }
     const result = await this.unique(res)
-    console.log(t)
-    // console.log(result)
+    // console.log(res)
+    console.log(result)
     return result
   }
 
@@ -115,7 +145,7 @@ class GraphService extends Service {
   }
 
   async per_path(p){
-    return path.parse(p).dir + '/'
+    return path.parse(path.normalize(p)).dir + '/'
   }
 
   async get_list(table,list){
