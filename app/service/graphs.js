@@ -24,7 +24,10 @@ class GraphService extends Service {
       targetWeight: 1,
       group: ''
     }
-    // this.nodes = {}
+    this.data = {
+      nodes:[],
+      edges:[]
+    }
   }
 
   async show(params) {
@@ -46,24 +49,82 @@ class GraphService extends Service {
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
     // const result = path.parse(params.source)
-
+    let t1 = new Date().getTime();
+    let t2 = t1
+    t1 = process.uptime()
     // const result = await this.app.mysql.select(this.table.fd);
     // return { result };
     // const test = this.get_list(this.table.fd,'f_dfile')
-    let test = this.paths(params)
+    let test = await this.paths(params)
     this.nodes(test)
-    this.edges(test)
-    this.tojson()
-
-    return test
+    t2 = process.uptime()
+    console.log(t2 - t1)
+    await this.edges(test)
+    // this.tojson()
+    t2 = process.uptime()
+    console.log(t2 - t1)
+    return this.data
   }
 
   async nodes(list){
-    
+    for (let value of list){
+      let tmp = {
+        id:value,
+        groupId:'test'
+      }
+      this.data.nodes.push(tmp)
+    }
   }
 
   async edges(list){
+    for (let sou of list){
+      for (let tar of list){
+        if(sou != tar){
+          if (false){
+            // tar /x/x.c/fun
+          }
+          else{
+            // tar /x/x /x.c
+            let s = sou
+            if(sou.indexOf('.') < 0){
+              s = sou + '/'
+            }
+            let sql_res = await this.sqlget_link(this.table.so,s.slice(1),tar.slice(1))
+            // if(!isNaN(value)){
+            let val = JSON.parse(JSON.stringify(sql_res))[0]['sum(count)']
+            if (Number(val)>0){
+              // console.log(val)
+              let tmp = {
+                source: sou,
+                target: tar,
+                sourceWeight: val,
+                targetWeight: 1,
+                group: 'test'
+              }
+              this.data.edges.push(tmp)
+            }
+          
+          }
+        }
+      }
+    }
+  }
 
+  async sqlget_link(table, path1, path2){
+    // SELECT SUM(COUNT) FROM `#{$sql_solist}` USE INDEX(F_path) WHERE F_path='#{$sline[i]}' AND C_path LIKE '#{$sline[j]}%'")
+    const sql = `select sum(count) from \`${table}\` use index(f_path) where f_path = '${path1}' and c_path like '${path2}%';`
+    const count = await this.app.mysql.query(sql);
+    return count
+  }
+
+  edge(str){
+    return {
+      source: '',
+      target: '',
+      sourceWeight: 1,
+      targetWeight: 1,
+      group: ''
+    }
   }
 
   async tojson(){
@@ -107,11 +168,11 @@ class GraphService extends Service {
     // add per path - fix-001
     if (path_input.indexOf(".") > 0) {
       // .x file
-      console.log('1 ' + path_input)
+      // console.log('1 ' + path_input)
     }
     else {
       // /x dir
-      console.log('2 ' + path_input)
+      // console.log('2 ' + path_input)
       // t.push(path.parse(path_in).dir)
       let list = await this.get_list(this.table.fd,'f_dfile')
       for (let item of list){
@@ -136,7 +197,7 @@ class GraphService extends Service {
 
     const result = await this.unique(res)
     // console.log(res)
-    console.log(result)
+    // console.log(result)
     return result
   }
 
