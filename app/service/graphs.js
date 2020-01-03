@@ -17,16 +17,23 @@ class GraphService extends Service {
       group: '',
       value: 1
     }
-    this.edge = {
-      source: '',
-      target: '',
-      sourceWeight: 1,
-      targetWeight: 1,
-      group: ''
-    }
+    // this.edge = {
+    //   source: '',
+    //   target: '',
+    //   sourceWeight: 1,
+    //   targetWeight: 1,
+    //   group: ''
+    // }
     this.data = {
       nodes:[],
       edges:[]
+    }
+    this.t1 = new Date().getTime();
+    this.t2 = this.t1
+    this.flag = {
+      num: 0,
+      hit: 0,
+      miss: 0
     }
   }
 
@@ -49,20 +56,26 @@ class GraphService extends Service {
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
     // const result = path.parse(params.source)
-    let t1 = new Date().getTime();
-    let t2 = t1
-    t1 = process.uptime()
+    // let t1 = new Date().getTime();
+    // let t2 = t1
+    this.t1 = process.uptime()
     // const result = await this.app.mysql.select(this.table.fd);
     // return { result };
     // const test = this.get_list(this.table.fd,'f_dfile')
     let test = await this.paths(params)
+    
     this.nodes(test)
-    t2 = process.uptime()
-    console.log(t2 - t1)
+    this.t2 = process.uptime()
+    console.log('get node time ', this.t2 - this.t1)
+    // let rate = await this.check()
+    // console.log('rate',rate)
     await this.edges(test)
     // this.tojson()
-    t2 = process.uptime()
-    console.log(t2 - t1)
+    this.t2 = process.uptime()
+    console.log('get edges time ', this.t2 - this.t1)
+    this.t2 = process.uptime()
+    console.log('get all time ', this.t2 - this.t1)
+    console.log(this.flag,'node',this.data.nodes.length,'edge',this.data.edges.length)
     return this.data
   }
 
@@ -77,6 +90,7 @@ class GraphService extends Service {
   }
 
   async edges(list){
+    this.flag.num = list.length * (list.length - 1)
     for (let sou of list){
       for (let tar of list){
         if(sou != tar){
@@ -89,25 +103,45 @@ class GraphService extends Service {
             if(sou.indexOf('.') < 0){
               s = sou + '/'
             }
-            let sql_res = await this.sqlget_link(this.table.so,s.slice(1),tar.slice(1))
-            // if(!isNaN(value)){
-            let val = JSON.parse(JSON.stringify(sql_res))[0]['sum(count)']
-            if (Number(val)>0){
-              // console.log(val)
-              let tmp = {
-                source: sou,
-                target: tar,
-                sourceWeight: val,
-                targetWeight: 1,
-                group: 'test'
-              }
-              this.data.edges.push(tmp)
-            }
-          
+            // console.log(s,tar)
+            await this.edge(s,tar)
           }
         }
       }
     }
+  }
+
+  async edge(sou,tar){
+    // console.log(sou,tar)
+    let sql_res = await this.sqlget_link(this.table.so,sou.slice(1),tar.slice(1))
+    // if(!isNaN(value)){
+    // console.log(sql_res)
+    let val = JSON.parse(JSON.stringify(sql_res))[0]['sum(count)']
+    if (Number(val)>0){
+      // console.log(val)
+      let tmp = {
+        source: sou,
+        target: tar,
+        sourceWeight: val,
+        targetWeight: 1,
+        group: 'test'
+      }
+      this.flag.hit++
+      this.data.edges.push(tmp)
+      // console.log(this.data.edges.length)
+    }
+    else {
+      this.flag.miss++
+      
+      // this.flagmissadd()
+      // console.log(this.flag)
+    }
+    // this.t2 = process.uptime()
+    // console.log('get edge time ', this.t2 - this.t1)
+  }
+
+  flagmissadd(){
+    this.flag.miss = this.flag.miss + 1
   }
 
   async sqlget_link(table, path1, path2){
@@ -117,14 +151,23 @@ class GraphService extends Service {
     return count
   }
 
-  edge(str){
-    return {
-      source: '',
-      target: '',
-      sourceWeight: 1,
-      targetWeight: 1,
-      group: ''
+  // edge(str){
+  //   return {
+  //     source: '',
+  //     target: '',
+  //     sourceWeight: 1,
+  //     targetWeight: 1,
+  //     group: ''
+  //   }
+  // }
+  async check(){
+    // let rate = 1
+    let s = this.flag.num - this.flag.hit - this.flag.miss
+    while (s>0){
+      s = this.flag.num - this.flag.hit - this.flag.miss
+      // console.log(this.flag)
     }
+    return this.flag.hit/this.flag.num
   }
 
   async tojson(){
