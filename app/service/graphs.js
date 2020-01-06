@@ -3,6 +3,11 @@
 const Service = require('egg').Service
 const path = require("path")
 
+let data = {
+  nodes:[],
+  edges:[]
+}
+
 class GraphService extends Service {
   constructor(ctx) {
     super(ctx)
@@ -30,11 +35,6 @@ class GraphService extends Service {
     }
     this.t1 = new Date().getTime();
     this.t2 = this.t1
-    this.flag = {
-      num: 0,
-      hit: 0,
-      miss: 0
-    }
   }
 
   async show(params) {
@@ -49,7 +49,7 @@ class GraphService extends Service {
     return result.data.data;
   }
 
-  async list(params) {
+  async test(params) {
     // api/v1/graph  -list()
     // linux_4-15-18_R_x86_64_SLIST
     const { ctx } = this;
@@ -67,15 +67,19 @@ class GraphService extends Service {
     this.nodes(test)
     this.t2 = process.uptime()
     console.log('get node time ', this.t2 - this.t1)
-    // let rate = await this.check()
-    // console.log('rate',rate)
-    await this.edges(test)
-    // this.tojson()
+    
+    // this.edges(test)
+    await this.edges_async(test)
+    
     this.t2 = process.uptime()
     console.log('get edges time ', this.t2 - this.t1)
+    // this.tojson()
+    // await sleep(1000)
     this.t2 = process.uptime()
     console.log('get all time ', this.t2 - this.t1)
-    console.log(this.flag,'node',this.data.nodes.length,'edge',this.data.edges.length)
+    console.log('node',this.data.nodes.length,data.nodes.length)
+    console.log('edge',this.data.edges.length, data.edges.length)
+    
     return this.data
   }
 
@@ -86,11 +90,11 @@ class GraphService extends Service {
         groupId:'test'
       }
       this.data.nodes.push(tmp)
+      data.nodes.push(tmp)
     }
   }
 
   async edges(list){
-    this.flag.num = list.length * (list.length - 1)
     for (let sou of list){
       for (let tar of list){
         if(sou != tar){
@@ -111,11 +115,36 @@ class GraphService extends Service {
     }
   }
 
+  async edges_t(list){
+    const _s = this
+    let promises = []
+    for (let sou of list){
+      for (let tar of list){
+        if(sou != tar){
+          if (false){
+            // tar /x/x.c/fun
+          }
+          else{
+            // tar /x/x /x.c
+            let s = sou
+            if(sou.indexOf('.') < 0){
+              s = sou + '/'
+            }
+            promises.push(new Promise(async function(resolve, reject) {
+              await _s.edge(s,tar)
+              resolve()
+            }))
+          }
+        }
+      }
+    }
+    // console.log(promises.length)
+    await Promise.all(promises);
+  }
+
   async edge(sou,tar){
     // console.log(sou,tar)
     let sql_res = await this.sqlget_link(this.table.so,sou.slice(1),tar.slice(1))
-    // if(!isNaN(value)){
-    // console.log(sql_res)
     let val = JSON.parse(JSON.stringify(sql_res))[0]['sum(count)']
     if (Number(val)>0){
       // console.log(val)
@@ -126,22 +155,13 @@ class GraphService extends Service {
         targetWeight: 1,
         group: 'test'
       }
-      this.flag.hit++
       this.data.edges.push(tmp)
-      // console.log(this.data.edges.length)
+      data.edges.push(tmp)
     }
-    else {
-      this.flag.miss++
-      
-      // this.flagmissadd()
-      // console.log(this.flag)
-    }
+    // console.log(t)
+
     // this.t2 = process.uptime()
     // console.log('get edge time ', this.t2 - this.t1)
-  }
-
-  flagmissadd(){
-    this.flag.miss = this.flag.miss + 1
   }
 
   async sqlget_link(table, path1, path2){
@@ -149,25 +169,6 @@ class GraphService extends Service {
     const sql = `select sum(count) from \`${table}\` use index(f_path) where f_path = '${path1}' and c_path like '${path2}%';`
     const count = await this.app.mysql.query(sql);
     return count
-  }
-
-  // edge(str){
-  //   return {
-  //     source: '',
-  //     target: '',
-  //     sourceWeight: 1,
-  //     targetWeight: 1,
-  //     group: ''
-  //   }
-  // }
-  async check(){
-    // let rate = 1
-    let s = this.flag.num - this.flag.hit - this.flag.miss
-    while (s>0){
-      s = this.flag.num - this.flag.hit - this.flag.miss
-      // console.log(this.flag)
-    }
-    return this.flag.hit/this.flag.num
   }
 
   async tojson(){

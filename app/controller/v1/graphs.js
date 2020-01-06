@@ -32,8 +32,8 @@ class GraphController extends Controller {
       source: 'string',
       target: 'string',
     }, ctx.query);
-
-    ctx.body = await ctx.service.graphs.list(ctx.query);
+    
+    ctx.body = await ctx.service.graphs.test(ctx.query);
   }
 
 }
