@@ -10,13 +10,20 @@ class HomeService extends Service {
     this.show();
   }
 
-  async show() {
-    const { stdout, stderr } = await exec('pwd');
-    // console.log('stdout:', stdout);
-    console.log('stderr:', stderr);
-    // const result = stdout.replace('\n', '');
-    const result = await this.app.mysql.select('linux_4-15-18_R_x86_64_FDLIST');
-    return result;
+  async show(query) {
+    // console.log(query)
+    if (typeof query == 'object' && query.hasOwnProperty('source')){
+      const cmd = `./app/public/callgraph-sql.rb -2 / -d ${query.source} ${query.target} -o ./app/public/test.json null linux_${query.version} x86_64 null real`
+      await exec(cmd);
+      const { stdout, stderr } = await exec('cat ./app/public/test.json');
+      // console.log('stdout:', stdout);
+      // console.log('stderr:', stderr);
+      const result = JSON.parse(stdout.replace('\n', ''))
+      return result;
+    }
+    else{
+      return {};
+    }  
   }
 }
 

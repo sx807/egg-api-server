@@ -22,8 +22,8 @@ module Creat
 		#mydb=Mysql.connect('localhost', 'cgrtl', '9-410', 'callgraph')
 		mydb=Mysql2::Client.new(
 		    :host     => 'localhost',
-		    :username => 'cgrtl',
-		    :password => '9-410',
+		    :username => 'node',
+		    :password => 'node',
 		    :database => 'callgraph'
 		)
 		if(Creat.sqlexist($sql_fdlist)==1)
@@ -126,8 +126,8 @@ module Creat
 		#mydb=Mysql.connect('localhost', 'cgrtl', '9-410', 'callgraph')
 		mydb=Mysql2::Client.new(
 		    :host     => 'localhost',
-		    :username => 'cgrtl',
-		    :password => '9-410',
+		    :username => 'node',
+		    :password => 'node',
 		    :database => 'callgraph'
 		)
 		$sline=$sline.gsub(/ /,"").split("\n")
@@ -264,8 +264,8 @@ module Creat
 		#mydb=Mysql.connect('localhost', 'cgrtl', '9-410', 'callgraph')
 		mydb=Mysql2::Client.new(
 		    :host     => 'localhost',
-		    :username => 'cgrtl',
-		    :password => '9-410',
+		    :username => 'node',
+		    :password => 'node',
 		    :database => 'callgraph'
 		)
 		rsEX=mydb.query("SELECT count(*) FROM information_schema.TABLES WHERE TABLE_NAME=\"#{sqltablename}\"")
@@ -513,8 +513,8 @@ module Runtime
 		#mydb=Mysql.connect('localhost', 'cgrtl', '9-410', 'callgraph')
 		mydb=Mysql2::Client.new(
 		    :host     => 'localhost',
-		    :username => 'cgrtl',
-		    :password => '9-410',
+		    :username => 'node',
+		    :password => 'node',
 		    :database => 'callgraph'
 		)
 		if(Creat.sqlexist($sql_tlist)==1)
@@ -576,8 +576,8 @@ module Runpower
 		#mydb=Mysql.connect('localhost', 'cgrtl', '9-410', 'callgraph')
 		mydb=Mysql2::Client.new(
 		    :host     => 'localhost',
-		    :username => 'cgrtl',
-		    :password => '9-410',
+		    :username => 'node',
+		    :password => 'node',
 		    :database => 'callgraph'
 		)
 		if(Creat.sqlexist($sql_plist)==1)

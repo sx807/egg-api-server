@@ -33,8 +33,8 @@ class GraphService extends Service {
       nodes:[],
       edges:[]
     }
-    this.t1 = new Date().getTime();
-    this.t2 = this.t1
+    // this.t1 = new Date().getTime();
+    // this.t2 = this.t1
   }
 
   async show(params) {
@@ -58,27 +58,27 @@ class GraphService extends Service {
     // const result = path.parse(params.source)
     // let t1 = new Date().getTime();
     // let t2 = t1
-    this.t1 = process.uptime()
+    // this.t1 = process.uptime()
     // const result = await this.app.mysql.select(this.table.fd);
     // return { result };
     // const test = this.get_list(this.table.fd,'f_dfile')
     let test = await this.paths(params)
     
     this.nodes(test)
-    this.t2 = process.uptime()
-    console.log('get node time ', this.t2 - this.t1)
+    // this.t2 = process.uptime()
+    // console.log('get node time ', this.t2 - this.t1)
     
     // this.edges(test)
     await this.edges_async(test)
     
-    this.t2 = process.uptime()
-    console.log('get edges time ', this.t2 - this.t1)
+    // this.t2 = process.uptime()
+    // console.log('get edges time ', this.t2 - this.t1)
     // this.tojson()
     // await sleep(1000)
-    this.t2 = process.uptime()
-    console.log('get all time ', this.t2 - this.t1)
-    console.log('node',this.data.nodes.length,data.nodes.length)
-    console.log('edge',this.data.edges.length, data.edges.length)
+    // this.t2 = process.uptime()
+    // console.log('get all time ', this.t2 - this.t1)
+    // console.log('node',this.data.nodes.length,data.nodes.length)
+    // console.log('edge',this.data.edges.length, data.edges.length)
     
     return this.data
   }
@@ -90,7 +90,7 @@ class GraphService extends Service {
         groupId:'test'
       }
       this.data.nodes.push(tmp)
-      data.nodes.push(tmp)
+      // data.nodes.push(tmp)
     }
   }
 
@@ -115,7 +115,7 @@ class GraphService extends Service {
     }
   }
 
-  async edges_t(list){
+  async edges_async(list){
     const _s = this
     let promises = []
     for (let sou of list){
@@ -156,7 +156,7 @@ class GraphService extends Service {
         group: 'test'
       }
       this.data.edges.push(tmp)
-      data.edges.push(tmp)
+      // data.edges.push(tmp)
     }
     // console.log(t)
 
