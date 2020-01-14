@@ -87,7 +87,7 @@ class GraphService extends Service {
     for (let value of list){
       let tmp = {
         id:value,
-        groupId:'test'
+        // groupId:'test'
       }
       this.data.nodes.push(tmp)
       // data.nodes.push(tmp)
@@ -126,12 +126,8 @@ class GraphService extends Service {
           }
           else{
             // tar /x/x /x.c
-            let s = sou
-            if(sou.indexOf('.') < 0){
-              s = sou + '/'
-            }
             promises.push(new Promise(async function(resolve, reject) {
-              await _s.edge(s,tar)
+              await _s.edge(sou,tar)
               resolve()
             }))
           }
@@ -144,7 +140,11 @@ class GraphService extends Service {
 
   async edge(sou,tar){
     // console.log(sou,tar)
-    let sql_res = await this.sqlget_link(this.table.so,sou.slice(1),tar.slice(1))
+    let s = sou
+    if(sou.indexOf('.') < 0){
+      s = sou + '/'
+    }
+    let sql_res = await this.sqlget_link(this.table.so,s.slice(1),tar.slice(1))
     let val = JSON.parse(JSON.stringify(sql_res))[0]['sum(count)']
     if (Number(val)>0){
       // console.log(val)
@@ -152,8 +152,7 @@ class GraphService extends Service {
         source: sou,
         target: tar,
         sourceWeight: val,
-        targetWeight: 1,
-        group: 'test'
+        // groupId: 'test'
       }
       this.data.edges.push(tmp)
       // data.edges.push(tmp)

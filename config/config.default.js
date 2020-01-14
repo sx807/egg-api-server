@@ -21,6 +21,10 @@ module.exports = appInfo => {
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
+    cors: {
+      origin: '*', // 匹配规则  域名+端口  *则为全匹配
+      allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
+    },
     mysql: {
       // 单数据库信息配置
       client: {
