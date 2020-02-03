@@ -204,20 +204,27 @@ class GraphService extends Service {
   }
 
   async path(str){
-    const path_input = path.normalize(str)
+    // const path_input = path.normalize(str)
+    const path_input = str
+    console.log(path.parse(path_input))
     let path_per = path.parse(path_input).dir
     let res = []
     
     // add per path - fix-001
-    if (path_input.indexOf(".") > 0) {
+    if (path.parse(path_input).ext != '') {
       // .x file
       // console.log('1 ' + path_input)
+      let list = await this.get_fun_list(this.table.fd,'f_dfile, f_name', path_input)
+      for (let item of list) {
+        let p = '/' + item.f_dfile + '/' + item.f_name
+        res.push(p)
+      }
     }
     else {
       // /x dir
       // console.log('2 ' + path_input)
       // t.push(path.parse(path_in).dir)
-      let list = await this.get_list(this.table.fd,'f_dfile')
+      let list = await this.get_path_list(this.table.fd,'f_dfile')
       for (let item of list){
         let p = '/' + item.f_dfile
         if (path_input != '/' && p.indexOf(path_input) == 0){
@@ -252,8 +259,16 @@ class GraphService extends Service {
     return path.parse(path.normalize(p)).dir + '/'
   }
 
-  async get_list(table,list){
+  async get_fun_list(table, list, file){
+    const sql = `select ${list} from \`${table}\` where f_dfile='${file}';`
+    console.log(sql)
+    const flist = await this.app.mysql.query(sql);
+    return flist
+  }
+
+  async get_path_list(table, list){
     const sql = `select ${list} from \`${table}\` group by ${list} order by ${list} desc;`
+    console.log(sql)
     const flist = await this.app.mysql.query(sql);
     return flist
   }
