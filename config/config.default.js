@@ -29,7 +29,7 @@ module.exports = appInfo => {
       // 单数据库信息配置
       client: {
         // host
-        host: 'localhost',
+        host: '127.0.0.1',
         // host: '192.168.1.191',
         // host: 'localhost',
         // 端口号
