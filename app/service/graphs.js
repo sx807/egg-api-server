@@ -144,7 +144,7 @@ class GraphService extends Service {
     if(sou.indexOf('.') < 0){
       s = sou + '/'
     }
-    let sql_res = await this.sqlget_link(this.table.so,s.slice(1),tar.slice(1))
+    let sql_res = await this.service.sqls.get_edge_num(this.table.so,s.slice(1),tar.slice(1))
     let val = JSON.parse(JSON.stringify(sql_res))[0]['sum(count)']
     if (Number(val)>0){
       // console.log(val)
@@ -161,13 +161,6 @@ class GraphService extends Service {
 
     // this.t2 = process.uptime()
     // console.log('get edge time ', this.t2 - this.t1)
-  }
-
-  async sqlget_link(table, path1, path2){
-    // SELECT SUM(COUNT) FROM `#{$sql_solist}` USE INDEX(F_path) WHERE F_path='#{$sline[i]}' AND C_path LIKE '#{$sline[j]}%'")
-    const sql = `select sum(count) from \`${table}\` use index(f_path) where f_path = '${path1}' and c_path like '${path2}%';`
-    const count = await this.app.mysql.query(sql);
-    return count
   }
 
   async tojson(){
@@ -214,7 +207,7 @@ class GraphService extends Service {
     if (path.parse(path_input).ext != '') {
       // .x file
       // console.log('1 ' + path_input)
-      let list = await this.get_fun_list(this.table.fd,'f_dfile, f_name', path_input.slice(1))
+      let list = await this.service.sqls.get_fun_list(this.table.fd,'f_dfile, f_name', path_input.slice(1))
       for (let item of list) {
         let p = '/' + item.f_dfile + '/' + item.f_name
         res.push(p)
@@ -224,7 +217,7 @@ class GraphService extends Service {
       // /x dir
       console.log('2 ' + path_input)
       // t.push(path.parse(path_in).dir)
-      let list = await this.get_path_list(this.table.fd,'f_dfile')
+      let list = await this.service.sqls.get_path_list(this.table.fd,'f_dfile')
       for (let item of list){
         let p = '/' + item.f_dfile
         if (path_input != '/' && p.indexOf(path_input) == 0){
@@ -257,20 +250,6 @@ class GraphService extends Service {
 
   async per_path(p){
     return path.parse(path.normalize(p)).dir + '/'
-  }
-
-  async get_fun_list(table, list, file){
-    const sql = `select ${list} from \`${table}\` where f_dfile='${file}';`
-    // console.log(sql)
-    const flist = await this.app.mysql.query(sql);
-    return flist
-  }
-
-  async get_path_list(table, list){
-    const sql = `select ${list} from \`${table}\` group by ${list} order by ${list} desc;`
-    // console.log(sql)
-    const flist = await this.app.mysql.query(sql);
-    return flist
   }
 
   pathtojson(str) {
