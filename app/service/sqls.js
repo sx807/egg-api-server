@@ -22,7 +22,7 @@ class SqlService extends Service {
   }
 
   async get_path_list(table, list){
-    const sql = `select ${list} from \`${table}\` group by ${list} order by ${list} desc;`
+    const sql = `select ${list} from \`${table}\` group by ${list} order by ${list} asc;`
     // console.log(sql)
     const flist = await this.app.mysql.query(sql);
     return flist

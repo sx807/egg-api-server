@@ -199,7 +199,7 @@ class GraphService extends Service {
   async path(str){
     const path_input = path.normalize(str)
     // const path_input = str
-    // console.log(path.parse(path_input))
+    console.log(path.parse(path_input))
     let path_per = path.parse(path_input).dir
     let res = []
     

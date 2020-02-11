@@ -11,4 +11,6 @@ module.exports = app => {
 
   router.resources('graphs', '/api/v1/graphs', controller.v1.graphs);
 
+  router.resources('options', '/api/v1/options', controller.v1.options);
+
 };
