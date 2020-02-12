@@ -13,7 +13,7 @@ class OptionService extends Service {
       value: '4-15-18',
       label: '4.15.18'
     }];
-    return {data : list};
+    return list;
   }
 
   async show(params) {
@@ -34,5 +34,5 @@ class OptionService extends Service {
     return res
   }
 }
-
+ 
 module.exports = OptionService;
