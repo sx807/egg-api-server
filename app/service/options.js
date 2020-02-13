@@ -23,15 +23,10 @@ class OptionService extends Service {
     let res = []
     for (let item of list){
       let p = '/' + item.f_path
-      if(p.indexOf('.') < 0){
-        p = p.slice(0,p.lastIndexOf('/'))
-      }
-      res.push({
-        value: p
-        // label: p
-      })
+      p = p.slice(0,p.lastIndexOf('/'))
+      res.push(p)
     }
-    return res
+    return Array.from(new Set(res))
   }
 }
  
