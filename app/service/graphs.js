@@ -55,41 +55,21 @@ class GraphService extends Service {
     const { ctx } = this;
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
-    // const result = path.parse(params.source)
-    // let t1 = new Date().getTime();
-    // let t2 = t1
-    // this.t1 = process.uptime()
-    // const result = await this.app.mysql.select(this.table.fd);
-    // return { result };
-    // const test = this.get_list(this.table.fd,'f_dfile')
+
     let test = await this.paths(params)
     
     this.nodes(test)
-    // this.t2 = process.uptime()
-    // console.log('get node time ', this.t2 - this.t1)
     
-    // this.edges(test)
     await this.edges_async(test)
-    
-    // this.t2 = process.uptime()
-    // console.log('get edges time ', this.t2 - this.t1)
-    // this.tojson()
-    // await sleep(1000)
-    // this.t2 = process.uptime()
-    // console.log('get all time ', this.t2 - this.t1)
-    // console.log('node',this.data.nodes.length,data.nodes.length)
-    // console.log('edge',this.data.edges.length, data.edges.length)
     
     return this.data
   }
 
   async nodes(list){
-    for (let value of list){
-      let tmp = {
-        id:value,
-        // groupId:'test'
+    for (let item of list){
+      if (item.id != '') {
+        this.data.nodes.push(item)
       }
-      this.data.nodes.push(tmp)
       // data.nodes.push(tmp)
     }
   }
@@ -120,17 +100,11 @@ class GraphService extends Service {
     let promises = []
     for (let sou of list){
       for (let tar of list){
-        if(sou != tar){
-          if (false){
-            // tar /x/x.c/fun
-          }
-          else{
-            // tar /x/x /x.c
-            promises.push(new Promise(async function(resolve, reject) {
-              await _s.edge(sou,tar)
-              resolve()
-            }))
-          }
+        if(sou.id != tar.id){
+          promises.push(new Promise(async function(resolve, reject) {
+            await _s.edge(sou,tar)
+            resolve()
+          }))
         }
       }
     }
@@ -140,27 +114,26 @@ class GraphService extends Service {
 
   async edge(sou,tar){
     // console.log(sou,tar)
-    let s = sou
-    if(sou.indexOf('.') < 0){
-      s = sou + '/'
+    let s = sou.id
+    let t = tar.id
+    if(s.indexOf('.') < 0){
+      s = s + '/'
     }
-    let sql_res = await this.service.sqls.get_edge_num(this.table.so,s.slice(1),tar.slice(1))
+    let sql_res = await this.service.sqls.get_edge_num(this.table.so,s.slice(1),t.slice(1))
     let val = JSON.parse(JSON.stringify(sql_res))[0]['sum(count)']
     if (Number(val)>0){
       // console.log(val)
       let tmp = {
-        source: sou,
-        target: tar,
+        source: sou.id,
+        target: tar.id,
         sourceWeight: val,
+        type: sou.type
         // groupId: 'test'
       }
       this.data.edges.push(tmp)
       // data.edges.push(tmp)
     }
     // console.log(t)
-
-    // this.t2 = process.uptime()
-    // console.log('get edge time ', this.t2 - this.t1)
   }
 
   async tojson(){
@@ -170,21 +143,15 @@ class GraphService extends Service {
   async paths(p){
     let res = []
     if (p.source == '/' && p.target == '/'){
-      res = await this.path(p.source)
+      res = await this.path(p.source,3)
     }
     else {
-      res = res.concat(await this.path(p.source),await this.path(p.target))
+      res = res.concat(await this.path(p.source,1),await this.path(p.target,2))
     }
-    res = await this.unique(res)
-    res = res.filter(item => !(this.isrootpath(p.source,item) || this.isrootpath(p.target,item)))
-
-    // let sou = {}
-    // sou[path.normalize(p.source)] = {}
-    // sou[path.normalize(p.target)] = {}
+    res = await this.unique_obj(res)
     
-    // sou[path.parse(p.source).dir + '/'] = {}
-    // sou[path.parse(p.target).dir + '/'] = {}
-
+    res = res.filter(item => !(this.isrootpath(p.source,item.id) || this.isrootpath(p.target,item.id)))
+    // console.log(res)
     return res
   }
 
@@ -196,26 +163,26 @@ class GraphService extends Service {
     return res
   }
 
-  async path(str){
+  async path(str,type){
     const path_input = path.normalize(str)
     // const path_input = str
-    console.log(path.parse(path_input))
+    // console.log(path.parse(path_input))
     let path_per = path.parse(path_input).dir
     let res = []
     
-    // add per path - fix-001
     if (path.parse(path_input).ext != '') {
       // .x file
       // console.log('1 ' + path_input)
       let list = await this.service.sqls.get_fun_list(this.table.fd,'f_dfile, f_name', path_input.slice(1))
       for (let item of list) {
         let p = '/' + item.f_dfile + '/' + item.f_name
-        res.push(p)
+        res.push({id:p,type:type})
       }
-    }
-    else {
+      // need per path
+      res = res.concat(await this.path(path_per,3))
+    } else {
       // /x dir
-      console.log('2 ' + path_input)
+      // console.log('2 ' + path_input)
       // t.push(path.parse(path_in).dir)
       let list = await this.service.sqls.get_path_list(this.table.fd,'f_dfile')
       for (let item of list){
@@ -227,18 +194,18 @@ class GraphService extends Service {
             // console.log(p)
           }
           // console.log('2.1 ' + p)
-          res.push(p)
+          res.push({id:p,type:type})
         }
         else if (p.indexOf(path_per) == 0){
           p = p.slice(0,p.indexOf('/',path_per.length + 1))
           // console.log('2.2 ' + p)
           //fix
-          res.push(p)
+          res.push({id:p,type:3})
         }
       }
     }
 
-    const result = await this.unique(res)
+    const result = await this.unique_obj(res)
     // console.log(res)
     // console.log(result)
     return result
@@ -246,6 +213,14 @@ class GraphService extends Service {
 
   async unique (arr) {
     return Array.from(new Set(arr))
+  }
+
+   async unique_obj (arr) {
+    let obj ={}
+    return arr.reduce((cur,next) => {
+      obj[next.id] ? "" : obj[next.id] = true && cur.push(next);
+      return cur;
+    },[])
   }
 
   async per_path(p){
