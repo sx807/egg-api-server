@@ -127,7 +127,7 @@ class GraphService extends Service {
         source: sou.id,
         target: tar.id,
         sourceWeight: val,
-        type: sou.type
+        type: tar.type
         // groupId: 'test'
       }
       this.data.edges.push(tmp)
@@ -143,10 +143,10 @@ class GraphService extends Service {
   async paths(p){
     let res = []
     if (p.source == '/' && p.target == '/'){
-      res = await this.path(p.source,3)
+      res = await this.path(p.source,2)
     }
     else {
-      res = res.concat(await this.path(p.source,1),await this.path(p.target,2))
+      res = res.concat(await this.path(p.source,0),await this.path(p.target,1))
     }
     res = await this.unique_obj(res)
     
@@ -179,7 +179,7 @@ class GraphService extends Service {
         res.push({id:p,type:type})
       }
       // need per path
-      res = res.concat(await this.path(path_per,3))
+      res = res.concat(await this.path(path_per,2))
     } else {
       // /x dir
       // console.log('2 ' + path_input)
@@ -200,7 +200,7 @@ class GraphService extends Service {
           p = p.slice(0,p.indexOf('/',path_per.length + 1))
           // console.log('2.2 ' + p)
           //fix
-          res.push({id:p,type:3})
+          res.push({id:p,type:2})
         }
       }
     }
