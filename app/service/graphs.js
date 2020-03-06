@@ -3,11 +3,6 @@
 const Service = require('egg').Service
 const path = require("path")
 
-let data = {
-  nodes:[],
-  edges:[]
-}
-
 class GraphService extends Service {
   constructor(ctx) {
     super(ctx)
@@ -16,22 +11,14 @@ class GraphService extends Service {
       so : 'test'
       // s : 'linux_' + String(params.version) + '_R_x86_64_SLIST'
     }
-    this.node = {
-      id: '',
-      path: '',
-      group: '',
-      value: 1
+    this.options = {
+      per: true,
+      group: true
     }
-    // this.edge = {
-    //   source: '',
-    //   target: '',
-    //   sourceWeight: 1,
-    //   targetWeight: 1,
-    //   group: ''
-    // }
     this.data = {
       nodes:[],
-      edges:[]
+      edges:[],
+      groups:[]
     }
     // this.t1 = new Date().getTime();
     // this.t2 = this.t1
@@ -53,16 +40,35 @@ class GraphService extends Service {
     // api/v1/graph  -list()
     // linux_4-15-18_R_x86_64_SLIST
     const { ctx } = this;
+
+    const start = Date.now()
+    let log = 'testlog-service'
+
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
+  
+    if(params.options){
+      console.log(params.options)
+      await setoptions(params.options)
+    }
 
     let test = await this.paths(params)
-    
     this.nodes(test)
-    
+
+    log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
+
     await this.edges_async(test)
-    
+
+    log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
+    ctx.logger.info(log)
     return this.data
+  }
+
+  async setoptions(set){
+    const keys = Object.keys(set)
+    for (let key of keys) {
+      this.options[key] = set[key]
+    }
   }
 
   async nodes(list){
@@ -165,8 +171,7 @@ class GraphService extends Service {
 
   async path(str,type){
     const path_input = path.normalize(str)
-    // const path_input = str
-    // console.log(path.parse(path_input))
+
     let path_per = path.parse(path_input).dir
     let res = []
     
@@ -175,11 +180,19 @@ class GraphService extends Service {
       // console.log('1 ' + path_input)
       let list = await this.service.sqls.get_fun_list(this.table.fd,'f_dfile, f_name', path_input.slice(1))
       for (let item of list) {
-        let p = '/' + item.f_dfile + '/' + item.f_name
-        res.push({id:p,type:type})
+        let tmp = {}
+        tmp.id = '/' + item.f_dfile + '/' + item.f_name,
+        tmp.type = type,
+        tmp.groupId = path.parse(tmp.id).dir
+        
+        // let p = '/' + item.f_dfile + '/' + item.f_name
+        res.push(tmp)
       }
-      // need per path
-      res = res.concat(await this.path(path_per,2))
+      //per path
+      if(this.options.per){
+        res = res.concat(await this.path(path_per,2))
+      }
+
     } else {
       // /x dir
       // console.log('2 ' + path_input)
@@ -187,20 +200,30 @@ class GraphService extends Service {
       let list = await this.service.sqls.get_path_list(this.table.fd,'f_dfile')
       for (let item of list){
         let p = '/' + item.f_dfile
+        let tmp = {}
         if (path_input != '/' && p.indexOf(path_input) == 0){
           // x/...
           if(p.slice(path_input.length + 1).indexOf('/') > 1){
             p = p.slice(0,p.indexOf('/',path_input.length + 1))
             // console.log(p)
           }
+          tmp.id = p
+          tmp.type = type
+          tmp.groupId = path.parse(tmp.id).dir
           // console.log('2.1 ' + p)
-          res.push({id:p,type:type})
+
         }
-        else if (p.indexOf(path_per) == 0){
-          p = p.slice(0,p.indexOf('/',path_per.length + 1))
+        else if (p.indexOf(path_per) == 0 && this.options.per){
+
+          tmp.id = p.slice(0,p.indexOf('/',path_per.length + 1))
+          tmp.type = 2
+          // console.log(path.parse(tmp.id))
+          tmp.groupId = path.parse(tmp.id).dir
           // console.log('2.2 ' + p)
-          //fix
-          res.push({id:p,type:2})
+        }
+
+        if(Object.keys(tmp).length > 0 && res.findIndex((item) => item.id === tmp.id) < 0){
+          res.push(tmp)
         }
       }
     }
@@ -210,6 +233,8 @@ class GraphService extends Service {
     // console.log(result)
     return result
   }
+
+
 
   async unique (arr) {
     return Array.from(new Set(arr))
