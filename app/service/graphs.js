@@ -17,8 +17,8 @@ class GraphService extends Service {
     }
     this.data = {
       nodes:[],
-      edges:[],
-      groups:[]
+      edges:[]
+      // groups:[]
     }
     // this.t1 = new Date().getTime();
     // this.t2 = this.t1
@@ -47,10 +47,11 @@ class GraphService extends Service {
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
   
-    if(params.options){
-      console.log(params.options)
-      await setoptions(params.options)
-    }
+    // if(params.options){
+      // console.log(params.options)
+    await this.setoptions(params)
+    console.log(this.options)
+    // }
 
     let test = await this.paths(params)
     this.nodes(test)
@@ -67,7 +68,9 @@ class GraphService extends Service {
   async setoptions(set){
     const keys = Object.keys(set)
     for (let key of keys) {
-      this.options[key] = set[key]
+      if(this.options.hasOwnProperty(key)) {
+        this.options[key] = JSON.parse(set[key])
+      }
     }
   }
 
@@ -183,9 +186,10 @@ class GraphService extends Service {
         let tmp = {}
         tmp.id = '/' + item.f_dfile + '/' + item.f_name,
         tmp.type = type,
-        tmp.groupId = path.parse(tmp.id).dir
-        
+        // tmp.groupId = path.parse(tmp.id).dir
+        // this.group(tmp.groupId)
         // let p = '/' + item.f_dfile + '/' + item.f_name
+        
         res.push(tmp)
       }
       //per path
@@ -209,7 +213,7 @@ class GraphService extends Service {
           }
           tmp.id = p
           tmp.type = type
-          tmp.groupId = path.parse(tmp.id).dir
+          // tmp.groupId = path.parse(tmp.id).dir
           // console.log('2.1 ' + p)
 
         }
@@ -218,11 +222,12 @@ class GraphService extends Service {
           tmp.id = p.slice(0,p.indexOf('/',path_per.length + 1))
           tmp.type = 2
           // console.log(path.parse(tmp.id))
-          tmp.groupId = path.parse(tmp.id).dir
+          // tmp.groupId = path.parse(tmp.id).dir
           // console.log('2.2 ' + p)
         }
 
         if(Object.keys(tmp).length > 0 && res.findIndex((item) => item.id === tmp.id) < 0){
+          // this.group(tmp.groupId)
           res.push(tmp)
         }
       }
@@ -234,7 +239,18 @@ class GraphService extends Service {
     return result
   }
 
-
+  async group(id) {
+    if (this.data.groups.findIndex((item) => item.id === id) < 0) {
+      let tmp = {
+        id: id,
+        title: id
+      }
+      // if (this.options.per) {
+      //   tmp.parentId = path.parse(id).dir
+      // }
+      this.data.groups.push(tmp)
+    }
+  }
 
   async unique (arr) {
     return Array.from(new Set(arr))
