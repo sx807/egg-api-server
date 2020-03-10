@@ -2,6 +2,7 @@
 
 const Service = require('egg').Service
 const path = require("path")
+const history = {}
 
 class GraphService extends Service {
   constructor(ctx) {
@@ -16,8 +17,9 @@ class GraphService extends Service {
       group: true
     }
     this.data = {
-      nodes:[],
-      edges:[]
+      id: '',
+      nodes: [],
+      edges: []
       // groups:[]
     }
     // this.t1 = new Date().getTime();
@@ -36,6 +38,8 @@ class GraphService extends Service {
     return result.data.data;
   }
 
+  async 
+
   async test(params) {
     // api/v1/graph  -list()
     // linux_4-15-18_R_x86_64_SLIST
@@ -43,26 +47,96 @@ class GraphService extends Service {
 
     const start = Date.now()
     let log = 'testlog-service'
-
+    let list = []
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
-  
-    // if(params.options){
-      // console.log(params.options)
-    await this.setoptions(params)
-    console.log(this.options)
-    // }
 
-    let test = await this.paths(params)
-    this.nodes(test)
+    if(params.expand) {
+      // console.log('expand')
+      const id = params.id
+      this.data.id = id
+      const nodeid = params.expand
+      log = log + ' expand ' + nodeid
 
-    log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
+      await this.setoptions({ per: false })
+      list = await this.path(nodeid,3)
+      this.nodes(list)
+      const connect_node = await this.seach_history(id, nodeid)
+      log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
 
-    await this.edges_async(test)
+      // console.log(connect_node)
+      await this.edges_async(list, connect_node.tar)
+      await this.edges_async(connect_node.sou, list)
+      log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
+    } else {
+      // console.log('graph')
+      const id = params.version + ' ' + params.source + ' ' + params.target
+      if (this.has_history(id)) {
+        log = id + ' has history'
+        ctx.logger.info(log)
+        return this.get_history(id).data
+      }
+      this.data.id = id
+      await this.setoptions(params)
+      // console.log(this.options)
 
-    log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
+      list = await this.paths(params)
+      this.nodes(list)
+      log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
+
+      await this.edges_async(list, list)
+      log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
+
+      this.save_history(this.data)
+    }
+    
+
     ctx.logger.info(log)
     return this.data
+  }
+
+  has_history(id) {
+    console.log(Object.keys(history))
+    // console.log(history.hasOwnProperty(id))
+    if (history.hasOwnProperty(id))return true
+    return false
+  }
+
+  get_history(id) {
+    return history[id]
+  }
+
+  async seach_history(id, nodeID) {
+    let tmp = {
+      sou: [],
+      tar: []
+    }
+    let edges = this.get_history(id).data.edges
+    // console.log(edges)
+    // console.log(nodeID)
+    for (let edge of edges) {
+      if (edge.source == nodeID) {
+        // console.log(edge)
+        tmp.tar.push({
+          id: edge.target,
+          type: edge.type
+        })
+      }
+      if (edge.target == nodeID) {
+        // console.log(edge)
+        tmp.sou.push({
+          id: edge.source,
+          type: edge.type
+        })
+      }
+    }
+    return tmp
+  }
+
+  async save_history(data) {
+    // console.log(Object.keys(history))
+    history[data.id] = {}
+    history[data.id].data = data
   }
 
   async setoptions(set){
@@ -104,11 +178,11 @@ class GraphService extends Service {
     }
   }
 
-  async edges_async(list){
+  async edges_async(sou_list, tar_list){
     const _s = this
     let promises = []
-    for (let sou of list){
-      for (let tar of list){
+    for (let sou of sou_list){
+      for (let tar of tar_list){
         if(sou.id != tar.id){
           promises.push(new Promise(async function(resolve, reject) {
             await _s.edge(sou,tar)
