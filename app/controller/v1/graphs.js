@@ -9,20 +9,19 @@ class GraphController extends Controller {
     this.createRule = {
       version: 'string',
       source: 'string',
-      target: 'string',
-      tab: { type: 'enum', values: [ 'ask', 'share', 'job' ], required: false }
+      target: 'string'
     };
   }
 
-  async show() {
-    const { ctx } = this;
+  // async show() {
+  //   const { ctx } = this;
 
-    ctx.body = await ctx.service.graphs.show({
-      id: ctx.params.id,
-      mdrender: ctx.query.mdrender !== 'false',
-      accesstoken: ctx.query.accesstoken || '',
-    });
-  }
+  //   ctx.body = await ctx.service.graphs.show({
+  //     id: ctx.params.id,
+  //     mdrender: ctx.query.mdrender !== 'false',
+  //     accesstoken: ctx.query.accesstoken || '',
+  //   });
+  // }
 
   async index() {
     const { ctx } = this;
