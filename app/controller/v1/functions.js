@@ -16,7 +16,7 @@ class FunctionController extends Controller {
         target: 'string',
         }, ctx.query);
         
-        ctx.body = await ctx.service.function.test(ctx.query);
+        ctx.body = await ctx.service.functions.test(ctx.query);
     }
 
     // async show() {

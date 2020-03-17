@@ -43,11 +43,11 @@ class FunctionService extends Service {
     const start = Date.now()
     let log = 'testlog-service'
     this.set_sql_table(params.version)
-    list = get_call_list(params)
+    list = this.get_call_list(params)
     
     log = log + String(Date.now() - start)
     ctx.logger.info(log)
-    return this.data
+    return list
   }
 
   has_history(id) {
@@ -117,7 +117,7 @@ class FunctionService extends Service {
     else {
       let sou = val.source.slice(1)
       let tar = val.target.slice(1)
-      console.log(sou, tar, path.parse(sou))
+      // console.log(sou, tar, path.parse(sou))
       if (path.parse(sou).ext == ''){
         sou = sou + '%.%/%'
       }
@@ -126,12 +126,17 @@ class FunctionService extends Service {
       }
       let sql = await this.service.sqls.get_tar_fun(this.table.so, sou, tar)
       for (let item of sql) {
+        // {
+        //   F_path: 'xx/xx.c/xx',
+        //   C_path: 'xx/xx.c/xx',
+        //   COUNT: 1
+        // }
         let tmp = {
-          s_fun: path.parse(item.f_path),
-          s_file: path.parse(item.f_path),
-          t_fun: path.parse(item.c_path),
-          t_file: path.parse(item.c_path),
-          num: item.count
+          s_fun: path.parse(item.F_path).name,
+          s_file: path.parse(item.F_path).dir,
+          t_fun: path.parse(item.C_path).name,
+          t_file: path.parse(item.C_path).dir,
+          num: item.COUNT
         }
         res.push(tmp)
       }
