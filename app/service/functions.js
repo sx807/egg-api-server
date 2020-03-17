@@ -42,14 +42,19 @@ class FunctionService extends Service {
     let list = []
     const start = Date.now()
     let log = 'testlog-service'
+    const id = params.version + ' ' + params.source + ' ' + params.target
     this.set_sql_table(params.version)
+
     list = await this.get_call_list(params)
     list = await this.get_fun_info(list)
-    // console.log(list)
     list = await this.get_call_info(list)
+
+    this.data.id = id
+    this.data.list = list
+
     log = log + String(Date.now() - start)
     ctx.logger.info(log)
-    return list
+    return this.data
   }
 
   has_history(id) {
@@ -120,12 +125,12 @@ class FunctionService extends Service {
       // console.log('val', val.source)
       let sou = val.source.slice(1)
       let tar = val.target.slice(1)
-      // console.log(sou, tar, path.parse(sou))
+      console.log(sou, tar, path.parse(sou))
       if (path.parse(sou).ext == ''){
         sou = sou + '%.%/%'
       }
       else {
-        sou = sou + '%'
+        sou = sou + '/%'
       }
       let sql = await this.service.sqls.get_tar_fun(this.table.so, sou, tar)
       for (let item of sql) {
@@ -134,7 +139,7 @@ class FunctionService extends Service {
         //   C_path: 'xx/xx.c/xx',
         //   COUNT: 1
         // }
-        // console.log(item, path.parse(item.C_path))
+        console.log(item, path.parse(item.F_path))
         let tmp = {
           s_fun: path.parse(item.F_path).base,
           s_file: path.parse(item.F_path).dir,
@@ -152,13 +157,13 @@ class FunctionService extends Service {
   async get_fun_info(list) {
     if (list.length > 0) {
       for (let call of list) {
-        // console.log('call', call)
+        console.log('call', call)
         let sql = await this.service.sqls.get_fun(this.table.fd, call.s_fun, call.s_file)
-        // console.log('sql1', sql)
+        console.log('sql1', sql)
         call.s_line = sql[0].f_dline
         call.s_id = sql[0].f_id
         sql = await this.service.sqls.get_fun(this.table.fd, call.t_fun, call.t_file)
-        // console.log('sql2', sql)
+        console.log('sql2', sql)
         call.t_line = sql[0].f_dline
         call.t_id = sql[0].f_id
         // console.log(call)
