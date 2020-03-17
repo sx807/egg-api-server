@@ -44,7 +44,8 @@ class FunctionService extends Service {
     let log = 'testlog-service'
     this.set_sql_table(params.version)
     list = this.get_call_list(params)
-    
+    list = this.get_fun_info(list)
+    list = this.get_call_list(list)
     log = log + String(Date.now() - start)
     ctx.logger.info(log)
     return list
@@ -136,12 +137,37 @@ class FunctionService extends Service {
           s_file: path.parse(item.F_path).dir,
           t_fun: path.parse(item.C_path).name,
           t_file: path.parse(item.C_path).dir,
-          num: item.COUNT
+          num: item.COUNT,
+          call_line: []
         }
         res.push(tmp)
       }
     }
     return res
+  }
+
+  async get_fun_info(list) {
+    if (list.length > 0) {
+      for (let call of list) {
+        let sql = await this.service.sqls.get_fun(this.table.fd, call.s_fun, call.s_file)
+        call.s_line = sql.f_dline
+        call.s_id = sql.f_id
+        sql = await this.service.sqls.get_fun(this.table.fd, call.t_fun, call.t_file)
+        call.t_line = sql.f_dline
+        call.t_id = sql.f_id
+      }
+    }
+    return list
+  }
+
+  async get_call_info(list) {
+    if (list.length > 0) {
+      for (let call of list) {
+        let sql = await this.service.sqls.get_call_by_id(this.table.s, call.s_id, call.t_id)
+        call.call_line = sql
+      }
+    }
+    return list
   }
 
   async edges_async(sou_list, tar_list){

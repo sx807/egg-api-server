@@ -37,12 +37,18 @@ class SqlService extends Service {
     return result
   }
 
-  async get_fun_by_id(table, id) {
-    const sql = `select * from \`${table}\` where f_id=${id};`
+  async get_fun(table, name, file) {
+    const sql = `select * from \`${table}\` where f_name=${name} and f_dfile=${file};`
     // console.log(sql)
     const result = await this.app.mysql.query(sql);
     return result
   }
 
+  async get_call_by_id(table, s_id, t_id){
+    const sql = `select cd_line from \`${table}\` where f_point=${s_id} and c_point=${t_id};`
+    // console.log(sql)
+    const result = await this.app.mysql.query(sql);
+    return result
+  }
 }
 module.exports = SqlService;
