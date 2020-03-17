@@ -38,7 +38,7 @@ class SqlService extends Service {
   }
 
   async get_fun(table, name, file) {
-    const sql = `select * from \`${table}\` where f_name=${name} and f_dfile=${file};`
+    const sql = `select * from \`${table}\` where f_name='${name}' and f_dfile='${file}';`
     // console.log(sql)
     const result = await this.app.mysql.query(sql);
     return result

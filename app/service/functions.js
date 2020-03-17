@@ -43,9 +43,10 @@ class FunctionService extends Service {
     const start = Date.now()
     let log = 'testlog-service'
     this.set_sql_table(params.version)
-    list = this.get_call_list(params)
-    list = this.get_fun_info(list)
-    list = this.get_call_list(list)
+    list = await this.get_call_list(params)
+    list = await this.get_fun_info(list)
+    // console.log(list)
+    list = await this.get_call_info(list)
     log = log + String(Date.now() - start)
     ctx.logger.info(log)
     return list
@@ -116,6 +117,7 @@ class FunctionService extends Service {
       return []
     }
     else {
+      // console.log('val', val.source)
       let sou = val.source.slice(1)
       let tar = val.target.slice(1)
       // console.log(sou, tar, path.parse(sou))
@@ -132,10 +134,11 @@ class FunctionService extends Service {
         //   C_path: 'xx/xx.c/xx',
         //   COUNT: 1
         // }
+        // console.log(item, path.parse(item.C_path))
         let tmp = {
-          s_fun: path.parse(item.F_path).name,
+          s_fun: path.parse(item.F_path).base,
           s_file: path.parse(item.F_path).dir,
-          t_fun: path.parse(item.C_path).name,
+          t_fun: path.parse(item.C_path).base,
           t_file: path.parse(item.C_path).dir,
           num: item.COUNT,
           call_line: []
@@ -149,12 +152,16 @@ class FunctionService extends Service {
   async get_fun_info(list) {
     if (list.length > 0) {
       for (let call of list) {
+        // console.log('call', call)
         let sql = await this.service.sqls.get_fun(this.table.fd, call.s_fun, call.s_file)
-        call.s_line = sql.f_dline
-        call.s_id = sql.f_id
+        // console.log('sql1', sql)
+        call.s_line = sql[0].f_dline
+        call.s_id = sql[0].f_id
         sql = await this.service.sqls.get_fun(this.table.fd, call.t_fun, call.t_file)
-        call.t_line = sql.f_dline
-        call.t_id = sql.f_id
+        // console.log('sql2', sql)
+        call.t_line = sql[0].f_dline
+        call.t_id = sql[0].f_id
+        // console.log(call)
       }
     }
     return list
@@ -164,20 +171,22 @@ class FunctionService extends Service {
     if (list.length > 0) {
       for (let call of list) {
         let sql = await this.service.sqls.get_call_by_id(this.table.s, call.s_id, call.t_id)
-        call.call_line = sql
+        for (let item of sql) {
+          call.call_line.push(item.cd_line)
+        }
       }
     }
     return list
   }
 
   async edges_async(sou_list, tar_list){
-    const _s = this
+    const _t = this
     let promises = []
     for (let sou of sou_list){
       for (let tar of tar_list){
         if(sou.id != tar.id){
           promises.push(new Promise(async function(resolve, reject) {
-            await _s.edge(sou,tar)
+            await _t.edge(sou,tar)
             resolve()
           }))
         }
