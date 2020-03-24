@@ -225,13 +225,18 @@ class GraphService extends Service {
     let res = []
     if (p.source == '/' && p.target == '/'){
       res = await this.path(p.source,2)
+      res = res.filter(item => !(this.isrootpath(p.source,item.id) || this.isrootpath(p.target,item.id)))
     }
     else {
-      res = res.concat(await this.path(p.source,0),await this.path(p.target,1))
+      let path1 = await this.path(p.source,0)
+      path1 = path1.filter(item => !(this.isrootpath(p.target,item.id)))
+      let path2 = await this.path(p.target,1)
+      path2 = path2.filter(item => !(this.isrootpath(p.source,item.id)))
+      res = res.concat(path1, path2)
     }
     res = await this.unique_obj(res)
     
-    res = res.filter(item => !(this.isrootpath(p.source,item.id) || this.isrootpath(p.target,item.id)))
+    // res = res.filter(item => !(this.isrootpath(p.source,item.id) || this.isrootpath(p.target,item.id)))
     // console.log(res)
     return res
   }
@@ -252,12 +257,12 @@ class GraphService extends Service {
     
     if (path.parse(path_input).ext != '') {
       // .x file
-      // console.log('1 ' + path_input)
+      console.log('1 ' + path_input)
       let list = await this.service.sqls.get_fun_list(this.table.fd,'f_dfile, f_name', path_input.slice(1))
       for (let item of list) {
         let tmp = {}
-        tmp.id = '/' + item.f_dfile + '/' + item.f_name,
-        tmp.type = type,
+        tmp.id = '/' + item.f_dfile + '/' + item.f_name
+        tmp.type = type
         // tmp.groupId = path.parse(tmp.id).dir
         // this.group(tmp.groupId)
         // let p = '/' + item.f_dfile + '/' + item.f_name
@@ -269,9 +274,9 @@ class GraphService extends Service {
         res = res.concat(await this.path(path_per,2))
       }
 
-    } else {
+    } else if (path.parse(path_per).ext === '') {
       // /x dir
-      // console.log('2 ' + path_input)
+      console.log('2 ' + path_input)
       // t.push(path.parse(path_in).dir)
       let list = await this.service.sqls.get_path_list(this.table.fd,'f_dfile')
       for (let item of list){
@@ -303,6 +308,13 @@ class GraphService extends Service {
           res.push(tmp)
         }
       }
+    } else {
+      // /xx/xx.x/xxxx
+      console.log('3 ' + path_input)
+      let tmp = {}
+        tmp.id = path_input
+        tmp.type = type
+        res.push(tmp)
     }
 
     const result = await this.unique_obj(res)
