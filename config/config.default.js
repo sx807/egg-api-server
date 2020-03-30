@@ -22,8 +22,14 @@ module.exports = appInfo => {
   const userConfig = {
     // myAppName: 'egg',
     cors: {
-      origin: '*', // 匹配规则  域名+端口  *则为全匹配
+      // credentials: true,
+      origin: '*',//http://localhost:9527', // 匹配规则  域名+端口  *则为全匹配
       allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
+    },
+    security: {
+      csrf: {
+        ignoreJSON: true, // 默认为 false，当设置为 true 时，将会放过所有 content-type 为 `application/json` 的请求
+      },
     },
     mysql: {
       // 单数据库信息配置

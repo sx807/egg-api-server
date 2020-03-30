@@ -93,6 +93,11 @@ class GraphService extends Service {
     return this.data
   }
 
+  async create(params) {
+    console.log(params)
+    return '123456';
+  }
+
   has_history(id) {
     console.log(Object.keys(history))
     // console.log(history.hasOwnProperty(id))

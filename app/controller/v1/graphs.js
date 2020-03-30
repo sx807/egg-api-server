@@ -35,6 +35,16 @@ class GraphController extends Controller {
     ctx.body = await ctx.service.graphs.test(ctx.query);
   }
 
+  async create() {
+    const { ctx } = this;
+    // ctx.validate(this.createRule);
+
+    const id = await ctx.service.graphs.create(ctx.request.body);
+    ctx.body = {
+      topic_id: id,
+    };
+    ctx.status = 201;
+  }
 }
 
 module.exports = GraphController;
