@@ -76,7 +76,7 @@ class GraphService extends Service {
     } else {
       // console.log('graph')
       const id = params.version + ' ' + params.source + ' ' + params.target
-      if (this.has_history(id)) {
+      if (this.is_history(id)) {
         log = id + ' has history'
         ctx.logger.info(log)
         return this.get_history(id).data
@@ -113,7 +113,7 @@ class GraphService extends Service {
     return share_kay;
   }
 
-  has_history(id) {
+  is_history(id) {
     console.log(Object.keys(history))
     // console.log(history.hasOwnProperty(id))
     if (history.hasOwnProperty(id))return true
