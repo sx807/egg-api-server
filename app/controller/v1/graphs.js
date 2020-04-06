@@ -13,15 +13,13 @@ class GraphController extends Controller {
     };
   }
 
-  // async show() {
-  //   const { ctx } = this;
+  async show() {
+    const { ctx } = this;
 
-  //   ctx.body = await ctx.service.graphs.show({
-  //     id: ctx.params.id,
-  //     mdrender: ctx.query.mdrender !== 'false',
-  //     accesstoken: ctx.query.accesstoken || '',
-  //   });
-  // }
+    ctx.body = await ctx.service.graphs.show({
+      id: ctx.params.id
+    });
+  }
 
   async index() {
     const { ctx } = this;
@@ -39,9 +37,9 @@ class GraphController extends Controller {
     const { ctx } = this;
     // ctx.validate(this.createRule);
 
-    const id = await ctx.service.graphs.create(ctx.request.body);
+    const key = await ctx.service.graphs.create(ctx.request.body);
     ctx.body = {
-      topic_id: id,
+      share_key: key,
     };
     ctx.status = 201;
   }

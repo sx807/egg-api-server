@@ -2,7 +2,10 @@
 
 const Service = require('egg').Service
 const path = require("path")
+const crypto = require('crypto')
+
 const history = {}
+const share_data = {}
 
 class GraphService extends Service {
   constructor(ctx) {
@@ -26,17 +29,21 @@ class GraphService extends Service {
     // this.t2 = this.t1
   }
 
-  // async show(params) {
-  //   const result = await this.request(`/graph/${params.id}`, {
-  //     data: {
-  //       mdrender: params.mdrender,
-  //       accesstoken: params.accesstoken,
-  //     },
-  //   });
-  //   this.checkSuccess(result);
-
-  //   return result.data.data;
-  // }
+  async show(params) {
+    // const result = {}
+    console.log(params)
+    console.log(Object.keys(share_data))
+    // console.log(share_data.data)
+    if (share_data.hasOwnProperty(params.id)) {
+      // result.config = share_data[params.id].config
+      // resule.graph = {
+      //   nodes: share_data[params.id].data.nodes,
+      //   edges: share_data[params.id].data.edges
+      // }
+      return share_data[params.id]
+    }
+    return {}
+  }
 
   async test(params) {
     // api/v1/graph  -list()
@@ -94,8 +101,16 @@ class GraphService extends Service {
   }
 
   async create(params) {
-    console.log(params)
-    return '123456';
+    // console.log(params.data.nodes)
+    const md5 = crypto.createHash('md5')
+    const id = params.config.version + ' ' + params.config.source + ' ' + params.config.target
+    const share_kay = md5.update(id).digest('hex')
+    share_data[share_kay] = {
+      id: id,
+      config: params.config,
+      data: params.data
+    }
+    return share_kay;
   }
 
   has_history(id) {
