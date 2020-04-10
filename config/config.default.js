@@ -24,7 +24,7 @@ module.exports = appInfo => {
     cors: {
       // credentials: true,
       origin: '*',//http://localhost:9527', // 匹配规则  域名+端口  *则为全匹配
-      allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
+      allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
     },
     security: {
       csrf: {
