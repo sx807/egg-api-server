@@ -28,6 +28,29 @@ class OptionService extends Service {
     }
     return Array.from(new Set(res))
   }
+
+  async login(params) {
+    const result = {
+      code: 20000,
+      data:{
+        token:params.username + '-token'
+      }
+    }
+
+    return result
+  }
+
+  async info(params) {
+    const role = params.toString().split("-")[0]
+    const result = {
+      code: 20000,
+      data:{
+        roles:[role]
+      }
+    }
+
+    return result
+  }
 }
  
 module.exports = OptionService;

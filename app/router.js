@@ -15,4 +15,8 @@ module.exports = app => {
 
   router.resources('options', '/api/v1/options', controller.v1.options);
 
+  router.post('/api/user/login', controller.v1.options.login);
+
+  router.get('/api/user/info', controller.v1.options.info);
+
 };

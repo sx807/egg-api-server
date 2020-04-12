@@ -21,5 +21,24 @@ class OptionController extends Controller {
         });
     }
 
+    async login() {
+      const { ctx } = this;
+      ctx.validate({
+        username: 'string',
+        password: 'string'
+      });
+      ctx.body = await ctx.service.options.login(ctx.request.body);
+
+      ctx.status = 200;
+    }
+
+    async info() {
+      const { ctx } = this;
+      ctx.validate({
+        token: 'string'
+      }, ctx.query);
+      ctx.body = await ctx.service.options.info(ctx.query.token);
+    }
+  
 }
 module.exports = OptionController;
