@@ -17,7 +17,8 @@ class GraphService extends Service {
     }
     this.options = {
       per: true,
-      group: true
+      group: true,
+      expanded: ''
     }
     this.data = {
       id: '',
@@ -50,53 +51,19 @@ class GraphService extends Service {
     // linux_4-15-18_R_x86_64_SLIST
     const { ctx } = this;
 
-    const start = Date.now()
-    let log = 'testlog-service'
-    let list = []
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
-
+    const id = params.version + ' ' + params.source + ' ' + params.target
     if(params.expand) {
-      // console.log('expand')
-      const id = params.id
-      this.data.id = id
-      const nodeid = params.expand
-      log = log + ' expand ' + nodeid
-
-      await this.setoptions({ per: false })
-      list = await this.path(nodeid,3)
-      this.nodes(list)
-      const connect_node = await this.seach_history(id, nodeid)
-      log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
-
-      // console.log(connect_node)
-      await this.edges_async(list, connect_node.tar)
-      await this.edges_async(connect_node.sou, list)
-      log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
+      await this.expand_data(params)
     } else {
-      // console.log('graph')
-      const id = params.version + ' ' + params.source + ' ' + params.target
       if (this.is_history(id)) {
-        log = id + ' has history'
-        ctx.logger.info(log)
+        ctx.logger.info(id + ' has history')
         return this.get_history(id).data
       }
-      this.data.id = id
-      await this.setoptions(params)
-      // console.log(this.options)
-
-      list = await this.paths(params)
-      this.nodes(list)
-      log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
-
-      await this.edges_async(list, list)
-      log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
-
-      this.save_history(this.data)
+      await this.normal_data(params)
     }
     
-
-    ctx.logger.info(log)
     return this.data
   }
 
@@ -113,6 +80,62 @@ class GraphService extends Service {
     return share_kay;
   }
 
+  async expand_data(config) {
+    const { ctx } = this;
+    const start = Date.now()
+
+    let list = []
+    let log = 'testlog-service'
+    // console.log('expand')
+    let expanded = []
+    const id = config.id
+    this.data.id = id
+    const nodeid = config.expand
+    log = log + ' expand ' + nodeid
+    // console.log(config)
+    await this.setoptions(config)
+    await this.setoptions({ per: false })
+    if(this.options.expanded !== '') expanded = this.options.expanded.split(',')
+
+    list = await this.path(nodeid,3)
+    this.nodes(list)
+    const connect_node = await this.seach_history(id, nodeid, expanded)
+    log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
+
+    // console.log(connect_node)
+    await this.edges_async(list, connect_node.tar)
+    await this.edges_async(connect_node.sou, list)
+    log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
+
+    ctx.logger.info(log)
+  }
+
+  async normal_data(config) {
+    const { ctx } = this;
+    const start = Date.now()
+
+    let list = []
+    let log = 'testlog-service'
+    // console.log(config)
+    const id = config.version + ' ' + config.source + ' ' + config.target
+    
+    this.data.id = id
+    await this.setoptions(config)
+    // console.log(this.options)
+
+    list = await this.paths(config)
+    this.nodes(list)
+    log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
+
+    await this.edges_async(list, list)
+    log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
+
+    if(this.options.per) this.save_history(this.data)
+
+    ctx.logger.info(log)
+    return this.data
+  }
+
   is_history(id) {
     console.log(Object.keys(history))
     // console.log(history.hasOwnProperty(id))
@@ -121,26 +144,27 @@ class GraphService extends Service {
   }
 
   get_history(id) {
+    // console.log(history[id].data.nodes.length)
     return history[id]
   }
 
-  async seach_history(id, nodeID) {
+  async seach_history(id, nodeID, expanded) {
     let tmp = {
       sou: [],
       tar: []
     }
     let edges = this.get_history(id).data.edges
     // console.log(edges)
-    // console.log(nodeID)
+    console.log(expanded)
     for (let edge of edges) {
-      if (edge.source == nodeID) {
-        // console.log(edge)
+      if (edge.source === nodeID && !expanded.includes(edge.target)) {
+        console.log(edge.source, expanded.includes(edge.source))
         tmp.tar.push({
           id: edge.target,
           type: edge.type
         })
       }
-      if (edge.target == nodeID) {
+      if (edge.target === nodeID && !expanded.includes(edge.source)) {
         // console.log(edge)
         tmp.sou.push({
           id: edge.source,
@@ -161,7 +185,8 @@ class GraphService extends Service {
     const keys = Object.keys(set)
     for (let key of keys) {
       if(this.options.hasOwnProperty(key)) {
-        this.options[key] = JSON.parse(set[key])
+        console.log(key,this.options[key],set[key])
+        this.options[key] = JSON.parse(JSON.stringify(set[key]))
       }
     }
   }
