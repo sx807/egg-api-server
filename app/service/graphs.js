@@ -55,7 +55,7 @@ class GraphService extends Service {
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
     const id = params.version + ' ' + params.source + ' ' + params.target
     if(params.expand) {
-      await this.expand_data(params)
+      await this.expands_data(params)
     } else {
       if (this.is_history(id)) {
         ctx.logger.info(id + ' has history')
@@ -136,6 +136,37 @@ class GraphService extends Service {
     return this.data
   }
 
+  async expands_data(config) {
+    const { ctx } = this;
+    const start = Date.now()
+
+    let list = []
+    let log = 'testlog-service'
+    // console.log('expand')
+    let expanded = []
+    const id = config.id
+    this.data.id = id
+    const nodeid = config.expand
+    log = log + ' expand ' + nodeid
+    // console.log(config)
+    await this.setoptions(config)
+    await this.setoptions({ per: false })
+    if(this.options.expanded !== '') expanded = this.options.expanded.split(',')
+
+    list = await this.path(nodeid,3)
+    this.nodes(list)
+    const connect_node = await this.seach_history(id, nodeid, expanded)
+    log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
+
+    // console.log(connect_node)
+    await this.edges_async(list, connect_node.tar)
+    await this.edges_async(connect_node.sou, list)
+    log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
+
+    ctx.logger.info(log)
+    this.add_history_expanded(id,nodeid,this.data.nodes)
+  }
+
   is_history(id) {
     console.log(Object.keys(history))
     // console.log(history.hasOwnProperty(id))
@@ -153,25 +184,39 @@ class GraphService extends Service {
       sou: [],
       tar: []
     }
-    let edges = this.get_history(id).data.edges
+
+    let history = this.get_history(id)
     // console.log(edges)
-    console.log(expanded)
-    for (let edge of edges) {
-      if (edge.source === nodeID && !expanded.includes(edge.target)) {
-        console.log(edge.source, expanded.includes(edge.source))
-        tmp.tar.push({
+    // console.log(expanded)
+    for (let edge of history.data.edges) {
+      if (edge.source === nodeID) {
+        // console.log(edge.source, expanded.includes(edge.source))
+        if (expanded.includes(edge.target)) {
+          // console.log(edge.target, expanded.includes(edge.target))
+          tmp.tar = tmp.tar.concat(history.expanded[edge.target].nodes)
+        } else {
+          tmp.tar.push({
           id: edge.target,
           type: edge.type
         })
+        }
+        
       }
-      if (edge.target === nodeID && !expanded.includes(edge.source)) {
+      if (edge.target === nodeID) {
         // console.log(edge)
-        tmp.sou.push({
+        if (expanded.includes(edge.source)) {
+          // console.log(edge.source, expanded.includes(edge.source))
+          tmp.sou = tmp.sou.concat(history.expanded[edge.source].nodes)
+        } else {
+          tmp.sou.push({
           id: edge.source,
           type: edge.type
         })
+        }
+        
       }
     }
+    // console.log(tmp)
     return tmp
   }
 
@@ -179,6 +224,16 @@ class GraphService extends Service {
     // console.log(Object.keys(history))
     history[data.id] = {}
     history[data.id].data = data
+  }
+
+  async add_history_expanded(id,nodeid,data) {
+    // console.log(id,Object.keys(history[id].expanded))
+    if (!history[id].hasOwnProperty('expanded')){
+      history[id].expanded = {}
+    }
+    console.log(id,Object.keys(history[id].expanded))
+    history[id].expanded[nodeid] = {}
+    history[id].expanded[nodeid].nodes = data
   }
 
   async setoptions(set){
