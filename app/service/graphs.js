@@ -16,8 +16,8 @@ class GraphService extends Service {
       // s : 'linux_' + String(params.version) + '_R_x86_64_SLIST'
     }
     this.options = {
-      per: true,
-      group: true,
+      per: 1,
+      group: 1,
       expanded: ''
     }
     this.data = {
@@ -63,7 +63,7 @@ class GraphService extends Service {
       }
       await this.normal_data(params)
     }
-    
+
     return this.data
   }
 
@@ -94,7 +94,7 @@ class GraphService extends Service {
     log = log + ' expand ' + nodeid
     // console.log(config)
     await this.setoptions(config)
-    await this.setoptions({ per: false })
+    await this.setoptions({ per: 0 })
     if(this.options.expanded !== '') expanded = this.options.expanded.split(',')
 
     list = await this.path(nodeid,3)
@@ -187,7 +187,7 @@ class GraphService extends Service {
 
     let history = this.get_history(id)
     // console.log(edges)
-    // console.log(expanded)
+    // console.log(history)
     for (let edge of history.data.edges) {
       if (edge.source === nodeID) {
         // console.log(edge.source, expanded.includes(edge.source))
@@ -231,7 +231,7 @@ class GraphService extends Service {
     if (!history[id].hasOwnProperty('expanded')){
       history[id].expanded = {}
     }
-    console.log(id,Object.keys(history[id].expanded))
+    // console.log(id,Object.keys(history[id].expanded))
     history[id].expanded[nodeid] = {}
     history[id].expanded[nodeid].nodes = data
   }
@@ -240,8 +240,14 @@ class GraphService extends Service {
     const keys = Object.keys(set)
     for (let key of keys) {
       if(this.options.hasOwnProperty(key)) {
-        console.log(key,this.options[key],set[key])
-        this.options[key] = JSON.parse(JSON.stringify(set[key]))
+        // console.log(Number(set[key]),String(set[key]))
+        if(key === 'per'){
+          this.options[key] = Number(set[key])
+        } else {
+          this.options[key] = String(set[key])
+        }
+        
+        // console.log(key,this.options[key],Boolean(set[key]))
       }
     }
   }
@@ -371,6 +377,7 @@ class GraphService extends Service {
       }
       //per path
       if(this.options.per){
+        console.log('1 per ' + path_input)
         res = res.concat(await this.path(path_per,2))
       }
 
@@ -395,7 +402,7 @@ class GraphService extends Service {
 
         }
         else if (p.indexOf(path_per) == 0 && this.options.per){
-
+          // console.log('2 per ' + )
           tmp.id = p.slice(0,p.indexOf('/',path_per.length + 1))
           tmp.type = 2
           // console.log(path.parse(tmp.id))
