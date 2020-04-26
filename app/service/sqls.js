@@ -50,5 +50,55 @@ class SqlService extends Service {
     const result = await this.app.mysql.query(sql);
     return result
   }
+  // history
+  
+  async add_history(id, data){
+    const result = await this.app.mysql.insert('history',{id:id,data:JSON.stringify(data)});
+    // console.log(result)
+    return result
+  }
+
+  async update_history_expanded(id, key, data){
+    const sql = `update history set expanded = json_set(expanded ,'$."${key}"','${JSON.stringify(data)}') where id='${id}';`
+    const result = await this.app.mysql.query(sql);
+    // console.log(result)
+    return result
+  }
+
+  async get_history_list(id){
+    const result = await this.app.mysql.select('history',{columns:['id']});
+    // console.log(result)
+    return result
+  }
+
+  async exist_history(id){
+    const result = await this.app.mysql.select('history',{
+      where: { id: id },
+      columns: ['id']
+    });
+    // console.log(result)
+    return result
+  }
+
+  async get_history_data(id){
+    const result = await this.app.mysql.get('history',{id:id});
+    // console.log(result)
+    return result
+  }
+
+
+  // share
+
+  async get_share_data(id){
+    const result = await this.app.mysql.get('share',{id:id});
+    // console.log(result)
+    return result
+  }
+
+  async add_share(id, data){
+    const result = await this.app.mysql.insert('share',{id:id,data:JSON.stringify(data)});
+    // console.log(result)
+    return result
+  }
 }
 module.exports = SqlService;

@@ -4,8 +4,8 @@ const Service = require('egg').Service
 const path = require("path")
 const crypto = require('crypto')
 
-const history = {}
-const share_data = {}
+let history = {}
+let share_data = {}
 
 class GraphService extends Service {
   constructor(ctx) {
@@ -31,19 +31,8 @@ class GraphService extends Service {
   }
 
   async show(params) {
-    // const result = {}
-    console.log(params)
-    console.log(Object.keys(share_data))
-    // console.log(share_data.data)
-    if (share_data.hasOwnProperty(params.id)) {
-      // result.config = share_data[params.id].config
-      // resule.graph = {
-      //   nodes: share_data[params.id].data.nodes,
-      //   edges: share_data[params.id].data.edges
-      // }
-      return share_data[params.id]
-    }
-    return {}
+    const res = await this.service.sqls.get_share_data(params.id)
+    return res.data
   }
 
   async test(params) {
@@ -54,12 +43,14 @@ class GraphService extends Service {
     this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
     const id = params.version + ' ' + params.source + ' ' + params.target
+    await this.setoptions(params)
     if(params.expand) {
       await this.expands_data(params)
     } else {
-      if (this.is_history(id)) {
+      if (await this.is_history(id) && this.options.per) {
         ctx.logger.info(id + ' has history')
-        return this.get_history(id).data
+        const res = await this.get_history(id)
+        return res.data
       }
       await this.normal_data(params)
     }
@@ -70,13 +61,16 @@ class GraphService extends Service {
   async create(params) {
     // console.log(params.data.nodes)
     const md5 = crypto.createHash('md5')
-    const id = params.config.version + ' ' + params.config.source + ' ' + params.config.target
+    const date = Date.now()
+    const id = params.config.version + ' ' + params.config.source + ' ' + params.config.target + date.toString()
     const share_kay = md5.update(id).digest('hex')
-    share_data[share_kay] = {
+    const data = {
       id: id,
+      date: date,
       config: params.config,
       data: params.data
     }
+    this.service.sqls.add_share(share_kay,data)
     return share_kay;
   }
 
@@ -93,7 +87,6 @@ class GraphService extends Service {
     const nodeid = config.expand
     log = log + ' expand ' + nodeid
     // console.log(config)
-    await this.setoptions(config)
     await this.setoptions({ per: 0 })
     if(this.options.expanded !== '') expanded = this.options.expanded.split(',')
 
@@ -120,7 +113,6 @@ class GraphService extends Service {
     const id = config.version + ' ' + config.source + ' ' + config.target
     
     this.data.id = id
-    await this.setoptions(config)
     // console.log(this.options)
 
     list = await this.paths(config)
@@ -167,16 +159,25 @@ class GraphService extends Service {
     this.add_history_expanded(id,nodeid,this.data.nodes)
   }
 
-  is_history(id) {
-    console.log(Object.keys(history))
+  async is_history(id) {
+    const list = await this.service.sqls.exist_history(id)
+    console.log('history:', JSON.parse(JSON.stringify(list)).length)
+    
     // console.log(history.hasOwnProperty(id))
-    if (history.hasOwnProperty(id))return true
+    if (JSON.parse(JSON.stringify(list)).length > 0)return true
     return false
   }
 
-  get_history(id) {
+  async get_history(id) {
     // console.log(history[id].data.nodes.length)
-    return history[id]
+    const res = await this.service.sqls.get_history_data(id)
+
+    const tmp = {
+      data: JSON.parse(res.data),
+      expanded: JSON.parse(res.expanded)
+    }
+    // console.log(tmp.expanded)
+    return tmp
   }
 
   async seach_history(id, nodeID, expanded) {
@@ -185,15 +186,15 @@ class GraphService extends Service {
       tar: []
     }
 
-    let history = this.get_history(id)
+    let history = await this.get_history(id)
     // console.log(edges)
     // console.log(history)
     for (let edge of history.data.edges) {
       if (edge.source === nodeID) {
         // console.log(edge.source, expanded.includes(edge.source))
         if (expanded.includes(edge.target)) {
-          // console.log(edge.target, expanded.includes(edge.target))
-          tmp.tar = tmp.tar.concat(history.expanded[edge.target].nodes)
+          // console.log(edge.target, JSON.parse(history.expanded[edge.target]))
+          tmp.tar = tmp.tar.concat(JSON.parse(history.expanded[edge.target]))
         } else {
           tmp.tar.push({
           id: edge.target,
@@ -206,7 +207,7 @@ class GraphService extends Service {
         // console.log(edge)
         if (expanded.includes(edge.source)) {
           // console.log(edge.source, expanded.includes(edge.source))
-          tmp.sou = tmp.sou.concat(history.expanded[edge.source].nodes)
+          tmp.sou = tmp.sou.concat(JSON.parse(history.expanded[edge.source]))
         } else {
           tmp.sou.push({
           id: edge.source,
@@ -224,16 +225,18 @@ class GraphService extends Service {
     // console.log(Object.keys(history))
     history[data.id] = {}
     history[data.id].data = data
+
+    await this.service.sqls.add_history(data.id,data)
+    
+    return
   }
 
   async add_history_expanded(id,nodeid,data) {
     // console.log(id,Object.keys(history[id].expanded))
-    if (!history[id].hasOwnProperty('expanded')){
-      history[id].expanded = {}
-    }
+    this.service.sqls.update_history_expanded(id,nodeid,data)
+    
+    return
     // console.log(id,Object.keys(history[id].expanded))
-    history[id].expanded[nodeid] = {}
-    history[id].expanded[nodeid].nodes = data
   }
 
   async setoptions(set){
