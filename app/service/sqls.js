@@ -53,7 +53,8 @@ class SqlService extends Service {
   // history
   
   async add_history(id, data){
-    const result = await this.app.mysql.insert('history',{id:id,data:JSON.stringify(data)});
+    const tmp = {}
+    const result = await this.app.mysql.insert('history',{id:id,data:JSON.stringify(data),expanded:JSON.stringify(tmp)});
     // console.log(result)
     return result
   }
