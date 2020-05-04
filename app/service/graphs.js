@@ -40,8 +40,8 @@ class GraphService extends Service {
     // linux_4-15-18_R_x86_64_SLIST
     const { ctx } = this;
 
-    this.table.fd = 'linux_' + params.version + '_R_x86_64_FDLIST';
-    this.table.so = 'linux_' + params.version + '_R_x86_64_SOLIST';
+    this.table.fd = 'linux_' + params.version + '_R_'x86_64'_FDLIST';
+    this.table.so = 'linux_' + params.version + '_R_' + + '_SOLIST';
     const id = params.version + ' ' + params.source + ' ' + params.target
     await this.setoptions(params)
     if(params.expand) {
