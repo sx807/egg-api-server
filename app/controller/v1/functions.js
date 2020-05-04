@@ -12,6 +12,7 @@ class FunctionController extends Controller {
 
         ctx.validate({
         version: 'string',
+        platform: 'string',
         source: 'string',
         target: 'string',
         }, ctx.query);

@@ -8,6 +8,7 @@ class GraphController extends Controller {
 
     this.createRule = {
       version: 'string',
+      platform: 'string',
       source: 'string',
       target: 'string'
     };
@@ -26,6 +27,7 @@ class GraphController extends Controller {
 
     ctx.validate({
       version: 'string',
+      platform: 'string',
       source: 'string',
       target: 'string',
     }, ctx.query);

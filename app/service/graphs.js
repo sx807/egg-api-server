@@ -40,9 +40,9 @@ class GraphService extends Service {
     // linux_4-15-18_R_x86_64_SLIST
     const { ctx } = this;
 
-    this.table.fd = 'linux_' + params.version + '_R_'x86_64'_FDLIST';
-    this.table.so = 'linux_' + params.version + '_R_' + + '_SOLIST';
-    const id = params.version + ' ' + params.source + ' ' + params.target
+    this.table.fd = 'linux_' + params.version + '_R_' + params.platform + '_FDLIST';
+    this.table.so = 'linux_' + params.version + '_R_' + params.platform + '_SOLIST';
+    const id = params.version + ' ' + params.platform  + ' ' + params.source + ' ' + params.target
     await this.setoptions(params)
     if(params.expand) {
       await this.expands_data(params)
@@ -62,7 +62,11 @@ class GraphService extends Service {
     // console.log(params.data.nodes)
     const md5 = crypto.createHash('md5')
     const date = Date.now()
-    const id = params.config.version + ' ' + params.config.source + ' ' + params.config.target + date.toString()
+    const id = params.config.version + ' ' +
+               params.platform + ' ' + 
+               params.config.source + ' ' + 
+               params.config.target  + ' ' + 
+               date.toString()
     const share_kay = md5.update(id).digest('hex')
     const data = {
       id: id,
@@ -110,7 +114,7 @@ class GraphService extends Service {
     let list = []
     let log = 'testlog-service'
     // console.log(config)
-    const id = config.version + ' ' + config.source + ' ' + config.target
+    const id = config.version + ' ' + config.platform + ' ' + config.source + ' ' + config.target
     
     this.data.id = id
     // console.log(this.options)

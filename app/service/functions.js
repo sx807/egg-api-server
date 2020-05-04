@@ -2,7 +2,6 @@
 
 const Service = require('egg').Service
 const path = require("path")
-const history = {}
 
 class FunctionService extends Service {
   constructor(ctx) {
@@ -42,8 +41,8 @@ class FunctionService extends Service {
     let list = []
     const start = Date.now()
     let log = 'testlog-service'
-    const id = params.version + ' ' + params.source + ' ' + params.target
-    this.set_sql_table(params.version)
+    const id = params.version + ' ' + params.platform + ' ' + params.source + ' ' + params.target
+    this.set_sql_table(params.version, params.platform)
 
     list = await this.get_call_list(params)
     list = await this.get_fun_info(list)
@@ -101,10 +100,10 @@ class FunctionService extends Service {
     history[data.id].data = data
   }
 
-  async set_sql_table(ver) {
-    this.table.fd = 'linux_' + ver + '_R_x86_64_FDLIST';
-    this.table.so = 'linux_' + ver + '_R_x86_64_SOLIST';
-    this.table.s = 'linux_' + ver + '_R_x86_64_SLIST';
+  async set_sql_table(ver, plat) {
+    this.table.fd = 'linux_' + ver + '_R_' + plat + '_FDLIST';
+    this.table.so = 'linux_' + ver + '_R_' + plat + '_SOLIST';
+    this.table.s = 'linux_' + ver + '_R_' + plat + '_SLIST';
   }
 
   async set_options(set) {

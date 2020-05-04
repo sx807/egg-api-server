@@ -9,16 +9,38 @@ class OptionService extends Service {
 
   async index(){
     // get kern list
-    const list = [{
-      value: '4-15-18',
-      label: '4.15.18'
-    }];
+    const list = [
+      {
+        value: '4-15-18',
+        label: '4.15.18',
+        platform: [
+          {
+            value: 'x86_64'
+          },
+          {
+            value: 'x86_32'
+          }
+        ]
+      },
+      {
+        value: '4-16-18',
+        label: '4.16.18',
+        platform: [
+          {
+            value: 'x86_64'
+          },
+          {
+            value: 'x86_32'
+          }
+        ]
+      },
+    ];
     return list;
   }
 
   async show(params) {
     // get path list
-    const table = 'linux_' + params.id + '_R_x86_64_SOLIST'
+    const table = 'linux_' + params.id + '_R_' + params.platform + '_SOLIST'
     const list = await this.ctx.service.sqls.get_path_list(table,'f_path')
     let res = []
     for (let item of list){
