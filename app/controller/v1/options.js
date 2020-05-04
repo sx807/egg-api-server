@@ -17,7 +17,8 @@ class OptionController extends Controller {
         const { ctx } = this;
 
         ctx.body = await ctx.service.options.show({
-            id: ctx.params.id
+            id: ctx.params.id,
+            platform: ctx.query.platform
         });
     }
 

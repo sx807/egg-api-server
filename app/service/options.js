@@ -15,10 +15,12 @@ class OptionService extends Service {
         label: '4.15.18',
         platform: [
           {
-            value: 'x86_64'
+            value: 'x86_64',
+            label: '64'
           },
           {
-            value: 'x86_32'
+            value: 'x86_32',
+            label: '32'
           }
         ]
       },
@@ -27,10 +29,12 @@ class OptionService extends Service {
         label: '4.16.18',
         platform: [
           {
-            value: 'x86_64'
+            value: 'x86_64',
+            label: '64'
           },
           {
-            value: 'x86_32'
+            value: 'x86_32',
+            label: '32'
           }
         ]
       },
