@@ -157,6 +157,7 @@ class GraphService extends Service {
     // console.log(connect_node)
     await this.edges_async(list, connect_node.tar)
     await this.edges_async(connect_node.sou, list)
+    // await this.edges_async(list, list)
     log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
 
     ctx.logger.info(log)
@@ -185,6 +186,7 @@ class GraphService extends Service {
   }
 
   async seach_history(id, nodeID, expanded) {
+    let expand = [nodeID]
     let tmp = {
       sou: [],
       tar: []
@@ -193,21 +195,32 @@ class GraphService extends Service {
     let history = await this.get_history(id)
     // console.log(edges)
     // console.log(history)
+    for (const i of Object.keys(expanded)) {
+      let key = expanded[i]
+      console.log(key)
+      if (nodeID.indexOf(key) === 0) {
+        console.log(nodeID, key)
+        expand.push(key)
+        console.log(JSON.parse(history.expanded[key]))
+        tmp.sou = tmp.sou.concat(JSON.parse(history.expanded[key]))
+        tmp.tar = tmp.tar.concat(JSON.parse(history.expanded[key]))
+      }
+    }
+    console.log(expanded, tmp)
     for (let edge of history.data.edges) {
-      if (edge.source === nodeID) {
+      if (expand.includes(edge.source)) {
         // console.log(edge.source, expanded.includes(edge.source))
         if (expanded.includes(edge.target)) {
           // console.log(edge.target, JSON.parse(history.expanded[edge.target]))
           tmp.tar = tmp.tar.concat(JSON.parse(history.expanded[edge.target]))
         } else {
           tmp.tar.push({
-          id: edge.target,
-          type: edge.type
-        })
+            id: edge.target,
+            type: edge.type
+          })
         }
-        
       }
-      if (edge.target === nodeID) {
+      if (expand.includes(edge.target)) {
         // console.log(edge)
         if (expanded.includes(edge.source)) {
           // console.log(edge.source, expanded.includes(edge.source))
@@ -221,6 +234,20 @@ class GraphService extends Service {
         
       }
     }
+    if (expand.length > 1) {
+      for (const key of expand) {
+        console.log('del', key)
+        let i = tmp.sou.findIndex((item) => item.id === key)
+        if (i > 0) {
+          tmp.sou.splice(i, 1)
+        }
+        i = tmp.tar.findIndex((item) => item.id === key)
+        if (i > 0) {
+          tmp.tar.splice(i, 1)
+        }
+      }
+    }
+    
     // console.log(tmp)
     return tmp
   }

@@ -87,6 +87,13 @@ class SqlService extends Service {
     return result
   }
 
+  async del_history(date){
+    const sql = `delete from history where date < from_unixtime(${date});`
+    const result = await this.app.mysql.query(sql);
+    // console.log(result)
+    return result
+  }
+
 
   // share
 
@@ -98,6 +105,13 @@ class SqlService extends Service {
 
   async add_share(id, data){
     const result = await this.app.mysql.insert('share',{id:id,data:JSON.stringify(data)});
+    // console.log(result)
+    return result
+  }
+
+  async del_share(date){
+    const sql = `delete from share where date < from_unixtime(${date});`
+    const result = await this.app.mysql.query(sql);
     // console.log(result)
     return result
   }
