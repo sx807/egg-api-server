@@ -419,13 +419,13 @@ class GraphService extends Service {
       }
       //per path
       if(this.options.per){
-        console.log('1 per ' + path_input)
+        // console.log('1 per ' + path_input)
         res = res.concat(await this.path(path_per,2))
       }
 
     } else if (path.parse(path_per).ext === '') {
       // /x dir
-      // console.log('2 ' + path_input)
+      console.log('2 ' + path_input)
       // t.push(path.parse(path_in).dir)
       let list = await this.service.sqls.get_path_list(this.table.fd,'f_dfile')
       for (let item of list){
@@ -469,7 +469,7 @@ class GraphService extends Service {
 
     const result = await this.unique_obj(res)
     // console.log(res)
-    console.log(result)
+    // console.log(result)
     return result
   }
 
