@@ -20,11 +20,22 @@ class FunctionController extends Controller {
         ctx.body = await ctx.service.functions.test(ctx.query);
     }
 
-    // async show() {
-    //     const { ctx } = this;
+    async show() {
+        const { ctx } = this;
 
-    //     ctx.body = await ctx.service.function.show();
-    // }
+        ctx.validate({
+          version: 'string',
+          platform: 'string',
+          file: 'string'
+          }, ctx.query);
+
+        ctx.body = await ctx.service.functions.show({
+          id: ctx.params.id,
+          version: ctx.query.version,
+          platform: ctx.query.platform,
+          file: ctx.query.file
+        });
+    }
 
 }
 module.exports = FunctionController;

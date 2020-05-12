@@ -22,17 +22,13 @@ class FunctionService extends Service {
     }
   }
 
-  // async show(params) {
-  //   const result = await this.request(`/graph/${params.id}`, {
-  //     data: {
-  //       mdrender: params.mdrender,
-  //       accesstoken: params.accesstoken,
-  //     },
-  //   });
-  //   this.checkSuccess(result);
-
-  //   return result.data.data;
-  // }
+  async show(params) {
+    const { ctx } = this;
+    console.log(params)
+    this.set_sql_table(params.version, params.platform)
+    const sql = await this.service.sqls.get_fun(this.table.fd, params.id, params.file)
+    return sql[0]
+  }
 
   async test(params) {
     // api/v1/graph  -list()

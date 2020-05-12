@@ -11,6 +11,16 @@ class OptionService extends Service {
     // get kern list
     const list = [
       {
+        value: '3-5-4',
+        label: '3.5.4',
+        platform: [
+          {
+            value: 'x86_32',
+            label: '32'
+          }
+        ]
+      },
+      {
         value: '4-15-18',
         label: '4.15.18',
         platform: [

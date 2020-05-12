@@ -363,15 +363,23 @@ class GraphService extends Service {
 
   async paths(p){
     let res = []
-    if (p.source == '/' && p.target == '/'){
-      res = await this.path(p.source,2)
-      res = res.filter(item => !(this.isrootpath(p.source,item.id) || this.isrootpath(p.target,item.id)))
+    if (p.source ===  p.target){
+      res = await this.path(p.source,0)
+      // res = res.filter(item => !(this.isrootpath(p.source,item.id) || this.isrootpath(p.target,item.id)))
+    }
+    else if (p.source === '/') {
+      let path1 = await this.path(p.source,0)
+      let path2 = await this.path(p.target,1)
+      res = res.concat(path1, path2)
+    }
+    else if (p.target === '/') {
+      let path1 = await this.path(p.source,0)
+      let path2 = await this.path(p.target,1)
+      res = res.concat(path2, path1)
     }
     else {
       let path1 = await this.path(p.source,0)
-      path1 = path1.filter(item => !(this.isrootpath(p.target,item.id)))
       let path2 = await this.path(p.target,1)
-      path2 = path2.filter(item => !(this.isrootpath(p.source,item.id)))
       res = res.concat(path1, path2)
     }
     res = await this.unique_obj(res)
@@ -391,7 +399,7 @@ class GraphService extends Service {
 
   async path(str,type){
     const path_input = path.normalize(str)
-
+    // console.log(path.parse(path_input))
     let path_per = path.parse(path_input).dir
     let res = []
     
@@ -417,15 +425,16 @@ class GraphService extends Service {
 
     } else if (path.parse(path_per).ext === '') {
       // /x dir
-      console.log('2 ' + path_input)
+      // console.log('2 ' + path_input)
       // t.push(path.parse(path_in).dir)
       let list = await this.service.sqls.get_path_list(this.table.fd,'f_dfile')
       for (let item of list){
         let p = '/' + item.f_dfile
         let tmp = {}
-        if (path_input != '/' && p.indexOf(path_input) == 0){
+        if (p.indexOf(path_input) == 0){
+        // if (path_input != '/' && p.indexOf(path_input) == 0){
           // x/...
-          if(p.slice(path_input.length + 1).indexOf('/') > 1){
+          if(p.slice(path_input.length + 1).indexOf('/') > 0){
             p = p.slice(0,p.indexOf('/',path_input.length + 1))
             // console.log(p)
           }
@@ -460,7 +469,7 @@ class GraphService extends Service {
 
     const result = await this.unique_obj(res)
     // console.log(res)
-    // console.log(result)
+    console.log(result)
     return result
   }
 
