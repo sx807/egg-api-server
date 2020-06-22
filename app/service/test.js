@@ -12,13 +12,21 @@ class HomeService extends Service {
 
   async show(query) {
     // console.log(query)
+    const start = Date.now()
     if (typeof query == 'object' && query.hasOwnProperty('source')){
-      const cmd = `./app/public/callgraph-sql.rb -2 / -d ${query.source} ${query.target} -o ./app/public/test.json null linux_${query.version} x86_64 null real`
+      let cmd = `./app/public/callgraph-sql.rb -2 / -d ${query.source} ${query.target} -o ./app/public/test.graph null linux_${query.version} x86_64 null real`
       await exec(cmd);
-      const { stdout, stderr } = await exec('cat ./app/public/test.json');
-      // console.log('stdout:', stdout);
-      // console.log('stderr:', stderr);
-      const result = JSON.parse(stdout.replace('\n', ''))
+      cmd = `dot -Tsvg ./app/public/test.graph -o ./app/public/test.svg`
+      await exec(cmd);
+      const { stdout, stderr } = await exec('du -h ./app/public/test.svg');
+      console.log('stdout:', stdout);
+      console.log('stderr:', stderr);
+      // const result = JSON.parse(stdout.replace('\n', ''))
+      const result = {
+        time_cost : Date.now() - start,
+        data_size : stdout.replace('\n', '').split(' ')[0]
+      }
+      // this.data.time_cost = Date.now() - start
       return result;
     }
     else{

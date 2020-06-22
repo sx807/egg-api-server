@@ -21,9 +21,10 @@ module Creat
 	def Creat.node(path,pre_path) #path include "/" like a/b/ or a/b/c.c	#确定用户输入路径内部的节点
 		#mydb=Mysql.connect('localhost', 'cgrtl', '9-410', 'callgraph')
 		mydb=Mysql2::Client.new(
-		    :host     => 'localhost',
+		    :host     => '192.168.3.100',
 		    :username => 'node',
-		    :password => 'node',
+			:password => 'node',
+			:port     => '3306',
 		    :database => 'callgraph'
 		)
 		if(Creat.sqlexist($sql_fdlist)==1)
@@ -732,16 +733,16 @@ $sql_tlist=$version+"_"+vir_temp+"_"+$a_ver+"_S2ETimeLIST"
 $sql_plist=$version+"_"+vir_temp+"_"+$a_ver+"_N5_PowerLIST"
 #$number_path=0
 Creat.nodes()
-puts "line-735 sline"
-puts $sline
+# puts "line-735 sline"
+# puts $sline
 
 Creat.slinenum()
 Runtime.run()
 Runpower.run()
 Creat.handle()
 
-# Creat.graph()
-Creat.graph2json()
+Creat.graph()
+# Creat.graph2json()
 
 #puts $sline
 =begin

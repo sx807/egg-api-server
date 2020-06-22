@@ -126,9 +126,10 @@ class GraphService extends Service {
     await this.edges_async(list, list)
     log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
 
-    if(this.options.per) this.save_history(this.data)
+    // if(this.options.per) this.save_history(this.data)
 
     ctx.logger.info(log)
+    this.data.time_cost = Date.now() - start
     return this.data
   }
 
