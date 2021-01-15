@@ -4,9 +4,6 @@ const Service = require('egg').Service
 const path = require("path")
 const crypto = require('crypto')
 
-let history = {}
-let share_data = {}
-
 class GraphService extends Service {
   constructor(ctx) {
     super(ctx)
@@ -26,6 +23,7 @@ class GraphService extends Service {
       edges: []
       // groups:[]
     }
+    this.history_type = 1
     // this.t1 = new Date().getTime();
     // this.t2 = this.t1
   }
@@ -38,7 +36,7 @@ class GraphService extends Service {
   async test(params) {
     // api/v1/graph  -list()
     // linux_4-15-18_R_x86_64_SLIST
-    const { ctx } = this;
+    // const { ctx } = this;
 
     this.table.fd = 'linux_' + params.version + '_R_' + params.platform + '_FDLIST';
     this.table.so = 'linux_' + params.version + '_R_' + params.platform + '_SOLIST';
@@ -47,9 +45,9 @@ class GraphService extends Service {
     if(params.expand) {
       await this.expands_data(params)
     } else {
-      if (await this.is_history(id) && this.options.per) {
-        ctx.logger.info(id + ' has history')
-        const res = await this.get_history(id)
+      if (await this.service.history.has_history(id,this.history_type) && this.options.per) {
+        this.logger.info(id + ' graph has history')
+        const res = await this.service.history.get_history(id,this.history_type)
         return res.data
       }
       await this.normal_data(params)
@@ -96,7 +94,7 @@ class GraphService extends Service {
 
     list = await this.path(nodeid,3)
     this.nodes(list)
-    const connect_node = await this.seach_history(id, nodeid, expanded)
+    const connect_node = await this.seach_connect_node(id, nodeid, expanded)
     log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
 
     // console.log(connect_node)
@@ -104,7 +102,7 @@ class GraphService extends Service {
     await this.edges_async(connect_node.sou, list)
     log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
 
-    ctx.logger.info(log)
+    this.logger.info(log)
   }
 
   async normal_data(config) {
@@ -126,7 +124,7 @@ class GraphService extends Service {
     await this.edges_async(list, list)
     log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
 
-    if(this.options.per) this.save_history(this.data)
+    if(this.options.per) this.service.history.save_history(this.history_type, this.data)
 
     ctx.logger.info(log)
     return this.data
@@ -151,7 +149,7 @@ class GraphService extends Service {
 
     list = await this.path(nodeid,3)
     this.nodes(list)
-    const connect_node = await this.seach_history(id, nodeid, expanded)
+    const connect_node = await this.seach_connect_node(id, nodeid, expanded)
     log = log + ' nodes:' + this.data.nodes.length + ' ' + String(Date.now() - start)
 
     // console.log(connect_node)
@@ -161,38 +159,17 @@ class GraphService extends Service {
     log = log + ' edges:' + this.data.edges.length + ' ' + String(Date.now() - start)
 
     ctx.logger.info(log)
-    this.add_history_expanded(id,nodeid,this.data.nodes)
+    this.service.history.add_history_expanded(id,this.history_type,nodeid,this.data.nodes)
   }
 
-  async is_history(id) {
-    const list = await this.service.sqls.exist_history(id)
-    console.log('history:', JSON.parse(JSON.stringify(list)).length)
-    
-    // console.log(history.hasOwnProperty(id))
-    if (JSON.parse(JSON.stringify(list)).length > 0)return true
-    return false
-  }
-
-  async get_history(id) {
-    // console.log(history[id].data.nodes.length)
-    const res = await this.service.sqls.get_history_data(id)
-
-    const tmp = {
-      data: JSON.parse(res.data),
-      expanded: JSON.parse(res.expanded)
-    }
-    // console.log(tmp.expanded)
-    return tmp
-  }
-
-  async seach_history(id, nodeID, expanded) {
+  async seach_connect_node(id, nodeID, expanded) {
     let expand = [nodeID]
     let tmp = {
       sou: [],
       tar: []
     }
 
-    let history = await this.get_history(id)
+    let history = await this.service.history.get_history(id,this.history_type)
     // console.log(edges)
     // console.log(history)
     for (const i of Object.keys(expanded)) {
@@ -250,24 +227,6 @@ class GraphService extends Service {
     
     // console.log(tmp)
     return tmp
-  }
-
-  async save_history(data) {
-    // console.log(Object.keys(history))
-    history[data.id] = {}
-    history[data.id].data = data
-
-    await this.service.sqls.add_history(data.id,data)
-    
-    return
-  }
-
-  async add_history_expanded(id,nodeid,data) {
-    // console.log(id,Object.keys(history[id].expanded))
-    this.service.sqls.update_history_expanded(id,nodeid,data)
-    
-    return
-    // console.log(id,Object.keys(history[id].expanded))
   }
 
   async setoptions(set){

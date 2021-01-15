@@ -5,6 +5,7 @@ const Service = require('egg').Service;
 class OptionService extends Service {
   constructor(ctx) {
     super(ctx);
+    this.history_type = 3;
   }
 
   async index(){
@@ -54,15 +55,28 @@ class OptionService extends Service {
 
   async show(params) {
     // get path list
-    const table = 'linux_' + params.id + '_R_' + params.platform + '_SOLIST'
-    const list = await this.ctx.service.sqls.get_path_list(table,'f_path')
-    let res = []
-    for (let item of list){
-      let p = '/' + item.f_path
-      p = p.slice(0,p.lastIndexOf('/'))
-      res.push(p)
+    const id = params.id + '_' + params.platform
+
+    if(await this.service.history.has_history(id, this.history_type)){
+      this.logger.info(id + ' option has history')
+      const res = await this.service.history.get_history(id,this.history_type)
+      return res.data.list
     }
-    return Array.from(new Set(res))
+
+    const table = 'linux_' + params.id + '_R_' + params.platform + '_SOLIST';
+    const list = await this.ctx.service.sqls.get_path_list(table,'f_path');
+    let res = [];
+    for (let item of list){
+      let p = '/' + item.f_path;
+      p = p.slice(0,p.lastIndexOf('/'));
+      res.push(p);
+    }
+    let save = {
+      id: id,
+      list: Array.from(new Set(res))
+    }
+    this.service.history.save_history(this.history_type,save)
+    return save.list;
   }
 
   async login(params) {
@@ -73,11 +87,11 @@ class OptionService extends Service {
       }
     }
 
-    return result
+    return result;
   }
 
   async info(params) {
-    const role = params.toString().split("-")[0]
+    const role = params.toString().split("-")[0];
     const result = {
       code: 20000,
       data:{
@@ -85,7 +99,7 @@ class OptionService extends Service {
       }
     }
 
-    return result
+    return result;
   }
 }
  

@@ -52,42 +52,36 @@ class SqlService extends Service {
   }
   // history
   
-  async add_history(id, data){
+  async add_history(id, type, data){
     const tmp = {}
-    const result = await this.app.mysql.insert('history',{id:id,data:JSON.stringify(data),expanded:JSON.stringify(tmp)});
+    const result = await this.app.mysql.insert('history',{id:id,type:type,data:JSON.stringify(data),expanded:JSON.stringify(tmp)});
     // console.log(result)
     return result
   }
 
-  async update_history_expanded(id, key, data){
-    const sql = `update history set expanded = json_set(expanded ,'$."${key}"','${JSON.stringify(data)}') where id='${id}';`
+  async update_history_expanded(id, type, key, data){
+    const sql = `update history set expanded = json_set(expanded ,'$."${key}"','${JSON.stringify(data)}') where id='${id}' and type=${type};`
     const result = await this.app.mysql.query(sql);
     // console.log(result)
     return result
   }
 
-  async get_history_list(id){
-    const result = await this.app.mysql.select('history',{columns:['id']});
-    // console.log(result)
-    return result
-  }
-
-  async exist_history(id){
+  async exist_history(id,type){
     const result = await this.app.mysql.select('history',{
-      where: { id: id },
+      where: { id: id , type: type },
       columns: ['id']
     });
     // console.log(result)
     return result
   }
 
-  async get_history_data(id){
-    const result = await this.app.mysql.get('history',{id:id});
+  async get_history_data(id,type){
+    const result = await this.app.mysql.get('history',{id:id,type:type});
     // console.log(result)
     return result
   }
 
-  async del_history(date){
+  async del_history(type,date){
     const sql = `delete from history where date < from_unixtime(${date});`
     const result = await this.app.mysql.query(sql);
     // console.log(result)
