@@ -12,9 +12,10 @@ class DeleteHistory extends Subscription {
 
   // subscribe 是真正定时任务执行时被运行的函数
   async subscribe() {
+    const days = 1
     let now = Math.floor(Date.now()/1000)
     console.log('delete history befor', now)
-    this.service.sqls.del_history(now - 1 * 24 * 60 * 60)
+    this.service.sqls.del_history(now - days * 24 * 60 * 60)
   }
 }
 

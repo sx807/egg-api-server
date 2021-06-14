@@ -2,6 +2,8 @@
 
 egg-for-linux-call-graph
 
+项目基于eggjs实现源码分析平台的数据服务器。能够为页面提供配置数据、调用图数据和调用表数据。
+
 ## QuickStart
 
 <!-- add docs here for user -->

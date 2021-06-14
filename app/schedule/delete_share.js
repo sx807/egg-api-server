@@ -12,9 +12,10 @@ class DeleteShare extends Subscription {
 
   // subscribe 是真正定时任务执行时被运行的函数
   async subscribe() {
+    const days = 30
     let now = Math.floor(Date.now()/1000)
     console.log('delete history befor', now)
-    this.service.sqls.del_share(now - 30 * 24 * 60 * 60)
+    this.service.sqls.del_share(now - days * 24 * 60 * 60)
   }
 }
 
